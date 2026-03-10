@@ -1,7 +1,8 @@
 import { Vec3 } from "/JS/vector.js"
 import { Sphere } from "/JS/spheres.js"
 import { Ray } from "/JS/ray.js"
-import { RayCastResult } from "/JS/ray_cast_result"
+import { RayCastResult } from "/JS/ray_cast_result.js"
+
 
 // Calculate the intersection point and normal when a ray hits a sphere. Returns a RayCastResult.
 function hit(ray, t, sphereIndex) {}
@@ -49,15 +50,13 @@ const spheres = new Array(
 
 
 // Main code
-let imageWidth = document.getElementById("canvas").width
-let imageHeight = document.getElementById("canvas").height
-let aspectRatio = document.getElementById("canvas").height / document.getElementById("canvas").width
+const imageWidth = document.getElementById("canvas").width
+const imageHeight = document.getElementById("canvas").height
+const aspectRatio = document.getElementById("canvas").height / document.getElementById("canvas").width
 
 // Creates ctx and defines simple names
 const ctx = canvas.getContext("2d");
-export const canvasWidth = canvas.width;
-export const canvasHeight = canvas.height;
-const img = ctx.createImageData(canvasWidth, canvasHeight);
+const img = ctx.createImageData(imageWidth, imageHeight);
 
 // Creates colour
 export const imgBuffer = new Uint32Array(img.data.buffer);
@@ -72,10 +71,10 @@ function clearImgBuffer() {
 
 // Fills the canvas with a gradient.
 function fillCanvas() {
-    for (let y=0; y<canvasHeight; y++) {
-        for (let x=0; x<canvasWidth; x++) {
-            const colour = packageRGBA(y/canvasHeight * 255, x/canvasWidth * 255, 200);
-            imgBuffer[y*canvasWidth + x] = colour;
+    for (let y=0; y<imageHeight; y++) {
+        for (let x=0; x<imageWidth; x++) {
+            const colour = packageRGBA(y/imageHeight * 255, x/imageWidth * 255, 200);
+            imgBuffer[y*imageWidth + x] = colour;
         }
     }
 }
