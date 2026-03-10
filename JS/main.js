@@ -1,86 +1,7 @@
-// Simple vector in 3D with numbers for x, y and z
-class Vec3
-{
-    constructor (x, y, z)
-    {
-        this.x = x
-        this.y = y
-        this.z = z
-    }
-
-    // Add other vector to this one and return the result
-    add(other)
-    {
-        return new Vec3(this.x + other.x, this.y + other.y, this.z + other.z)
-    }
-
-    // Subtract other vector from this one and return the result
-    minus(other){}
-
-    // Multiply other vector by this one and return the result
-    multiply(other){}
-
-    // Scale this vector by the number scalar and return the result
-    scale(scalar){}
-    
-    // Calculate the dot product of this vector with the other and return the result
-    dot(other) {}
-
-    // Calculate and return the magnitude of this vector
-    magnitude() {}
-    
-    // Calculate and return the magnitude of this vector without the square root
-    magnitudeSquared() {}
-
-    // Return a normalised version of this vector
-    normalised() {}
-}
-
-// A sphere in 3D space. Has centre, radius and colour all of which are Vec3s
-class Sphere
-{
-    constructor (centre, radius, colour)
-    {
-        this.centre = centre
-        this.radius = radius
-        this.colour = colour
-    }
-
-    // Calculate the point on the sphere  where the ray intersects using 
-    // a quadratic equation and return the t value of the ray for that point
-    // If two solutions exist return the minus solution
-    // If no solutions exist return -1
-    rayIntersects(ray)  {}
-}
-
-// Ray which has an origin and direction, both are Vec3s
-class Ray
-{
-    constructor (origin, direction)
-    {
-        this.origin = origin
-        this.direction = direction
-    }
-
-    // Calculate and return the point in space (a Vec3) for this ray for the given value of t
-    pointAt(t) {}
-}
-
-// The result of casting a ray into our scene
-// Position is the point where the ray intersects a sphere in the scene
-// Normal is the normal unit vector of the sphere at the intersection point
-// t is the t value along the ray where the intersection point is.  This value should, be -1 when the ray hits nothing
-// SphereIndex is the array index of the sphere hit by the ray
-class RayCastResult
-{
-    constructor(position, normal, t, sphereIndex)
-    {
-        this.position = position
-        this.normal = normal
-        this.t = t
-        this.sphereIndex = sphereIndex
-    }
-}
+import { Vec3 } from "/JS/vector.js"
+import { Sphere } from "/JS/spheres.js"
+import { Ray } from "/JS/ray.js"
+import { RayCastResult } from "/JS/ray_cast_result"
 
 // Calculate the intersection point and normal when a ray hits a sphere. Returns a RayCastResult.
 function hit(ray, t, sphereIndex) {}
@@ -131,6 +52,45 @@ const spheres = new Array(
 let imageWidth = document.getElementById("canvas").width
 let imageHeight = document.getElementById("canvas").height
 let aspectRatio = document.getElementById("canvas").height / document.getElementById("canvas").width
+
+// Creates ctx and defines simple names
+const ctx = canvas.getContext("2d");
+export const canvasWidth = canvas.width;
+export const canvasHeight = canvas.height;
+const img = ctx.createImageData(canvasWidth, canvasHeight);
+
+// Creates colour
+export const imgBuffer = new Uint32Array(img.data.buffer);
+function packageRGBA(r, g, b, a=255) {
+    return (a<<24) | (b<<16) | (g<<8) | r;
+}
+
+// Cleares the image buffer
+function clearImgBuffer() {
+    imgBuffer.fill(0);
+}
+
+// Fills the canvas with a gradient.
+function fillCanvas() {
+    for (let y=0; y<canvasHeight; y++) {
+        for (let x=0; x<canvasWidth; x++) {
+            const colour = packageRGBA(y/canvasHeight * 255, x/canvasWidth * 255, 200);
+            imgBuffer[y*canvasWidth + x] = colour;
+        }
+    }
+}
+
+// Runs the program
+function renderFrame() {
+    clearImgBuffer();
+    fillCanvas();
+
+    ctx.putImageData(img, 0, 0);
+    requestAnimationFrame(renderFrame);
+}
+
+// Calls the program
+requestAnimationFrame(renderFrame);
 
 let colour = new Vec3(0,0,0)
 
