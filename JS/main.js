@@ -114,8 +114,8 @@ function rayColour(ray)
 // Sets a pixel at (x, y) in the canvas with an RGB Vec3
 function setPixel(x, y, colour)
 {
-    var c = document.getElementById("canvas")
-    var ctx = c.getContext("2d")
+    const c = document.getElementById("canvas")
+    const ctx = c.getContext("2d")
     ctx.fillStyle = "rgba("+colour.x+","+colour.y+","+colour.z+","+1+")"
     ctx.fillRect(x, c.height - y, 1, 1)
 }
