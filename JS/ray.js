@@ -9,6 +9,6 @@ export class Ray
 
     // Calculate and return the point in space (a Vec3) for this ray for the given value of t
     pointAt(t) {
-        return this.origin + (this.direction * t);
+        return this.origin.add(this.direction.scale(t));
     }
 }

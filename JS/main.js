@@ -9,36 +9,10 @@ const ray = new Ray;
 // Calculate the intersection point and normal when a ray hits a sphere. Returns a RayCastResult.
 function hit(ray, t, sphereIndex)
 {
-    const a = ray.direction * ray.direction
-    const b = 2 * ray.direction * (ray.origin - sphere.centre)
-    const c = (ray.origin - sphere.centre) * (ray.origin - sphere.centre) - Math.pow(sphere.radius, 2);
-    const discriminant = Math.pow(b, 2) - (4 * a * c)
-
-    const intersectionPoint = ((-b - Math.sqrt(discriminant))) / (2 * a);
-    const intersectionNormal = (Math.sqrt(ray.origin + ray.direction * t) - sphere.c);
+    const intersectionPoint = ray.origin.add(ray.direction.scale(t));
+    const intersectionNormal = intersectionPoint.minus(spheres[sphereIndex].centre).scale(1 / spheres[sphereIndex].radius);
 
     return new RayCastResult(intersectionPoint, intersectionNormal, t, sphereIndex);
-    // const outHit = new RayCastResult(false, new Vec3(0,0,0), new Vec3(0,0,0), -1, sphereIndex);
-    // const offsetOrigin = ray.origin.minus(spheres[sphereIndex].centre);
-
-    // let a = ray.direction.dot(ray.direction);
-    // let b = 2.0 * offsetOrigin.dot(ray.direction);
-    // let c = offsetOrigin.dot(offsetOrigin) - Math.pow(spheres[sphereIndex].radius, 2);
-    // let discriminant = b * b - 4 * a * c;
-
-    // if(discriminant >= 0) 
-    // {
-    //     let dist = (-b - Math.sqrt(discriminant)) / (2 * a);
-
-    //     if(dist >= 0)
-    //     {
-    //         outHit.hit = true;
-    //         outHit.position = ray.origin.add(ray.direction.scale(dist));
-    //         outHit.normal = outHit.position.minus(spheres[sphereIndex].centre).scale(1/spheres[sphereIndex].radius);
-    //         outHit.dist = dist;
-    //     }
-    // }
-    // return outHit;
 }
 
 // Return a RayCastResult when a ray misses everything in the scene
@@ -119,7 +93,7 @@ for (let i = 0; i < imageWidth; i++)
         let v = j / (imageHeight - 1);
         
         let ray = new Ray(camPosition, lowerLeftCorner.add(horizontal.scale(u)).add(vertical.scale(v)).minus(camPosition));
-        colour.y = rayColour(ray).scale(255);
+        colour = rayColour(ray).scale(255);
         setPixel(i, j, colour);
     }
 }
