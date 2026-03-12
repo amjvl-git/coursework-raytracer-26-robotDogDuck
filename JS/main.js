@@ -4,13 +4,19 @@ import { Ray } from "/JS/ray.js"
 import { RayCastResult } from "/JS/ray_cast_result.js"
 
 const sphere = new Sphere;
+const ray = new Ray;
 
 // Calculate the intersection point and normal when a ray hits a sphere. Returns a RayCastResult.
 function hit(ray, t, sphereIndex)
 {
+    const a = ray.direction * ray.direction
+    const b = 2 * ray.direction * (ray.origin - sphere.centre)
+    const c = (ray.origin - sphere.centre) * (ray.origin - sphere.centre) - Math.pow(sphere.radius, 2);
+    const discriminant = Math.pow(b, 2) - (4 * a * c)
 
-    const intersectionPoint = (0);
-    const intersectionNormal = (Math.pow(ray.origin + ray.direction * t) - sphere.c);
+    const intersectionPoint = ((-b - Math.sqrt(discriminant))) / (2 * a);
+    const intersectionNormal = (Math.sqrt(ray.origin + ray.direction * t) - sphere.c);
+
     return new RayCastResult(intersectionPoint, intersectionNormal, t, sphereIndex);
     // const outHit = new RayCastResult(false, new Vec3(0,0,0), new Vec3(0,0,0), -1, sphereIndex);
     // const offsetOrigin = ray.origin.minus(spheres[sphereIndex].centre);
