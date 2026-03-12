@@ -24,10 +24,22 @@ function miss()
 // Check whether a ray hits anything in the scene and return a RayCast Result
 function traceRay(ray)
 {
-    let sphere = spheres[0];
-    let t = sphere.rayIntersects(ray);
-    if (t < 0)return miss();
-    else return hit(ray, t, 0);
+    let t = 10000000000000000000000000;
+    let closestSphereIndex = -1;
+
+    // Find the sphere intersection closest to this ray
+    for (let i = 0; i < spheres.length; i++)
+    {
+        let current_t = spheres[i].rayIntersects(ray);
+        if(current_t > 0 && current_t < t)
+        {
+            t = current_t;
+            closestSphereIndex = i;
+        }
+    }
+    if(closestSphereIndex < 0) return miss();
+
+    return hit(ray, t, closestSphereIndex);
 }
 
 // Calculate and return the background colour based on the ray
