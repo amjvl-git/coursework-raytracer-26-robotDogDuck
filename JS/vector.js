@@ -40,39 +40,23 @@ export class Vec3
         return this.x * other.x + this.y * other.y + this.z * other.z;
     }
 
-    calculating_magnitude(other){
-        // Squares and defines the other xyz axis
-        let other_x_squared = Math.pow(other.x, 2);
-        let other_y_squared = Math.pow(other.y, 2);
-        let other_z_squared = Math.pow(other.z, 2);
-        // Squares and defines this xyz axis
-        let x_squared = Math.pow(this.x, 2);
-        let y_squared = Math.pow(this.y, 2);
-        let z_squared = Math.pow(this.z, 2);
-        // Adds and square roots the sum to give the magnitude
-        let magnitude_x = Math.sqrt(other_x_squared + x_squared);
-        let magnitude_y = Math.sqrt(other_y_squared + y_squared);
-        let magnitude_z = Math.sqrt(other_z_squared + z_squared);
-        return (magnitude_x + magnitude_y + magnitude_z)
-    }
-
     // Calculate and return the magnitude of this vector
-    magnitude(other)
+    magnitude()
     {
-        return new Vec3(Math.sqrt(this.calculating_magnitude(other)));
+        return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
     }
     
     // Calculate and return the magnitude of this vector without the square root
-    magnitudeSquared(other)
+    magnitudeSquared()
     {
-        return new Vec3(this.calculating_magnitude(other));
+        return this.x * this.x + this.y * this.y + this.z * this.z;
     }
 
     // Return a normalised version of this vector
-    normalised(other)
+    normalised()
     {
-        let magnitude = Math.sqrt(this.calculating_magnitude(other))
-        let normal = 1 / magnitude
+        let magnitude = this.magnitude();
+        let normal = 1 / magnitude;
         return new Vec3(this.x * normal, this.y * normal, this.z * normal);
     }
 }

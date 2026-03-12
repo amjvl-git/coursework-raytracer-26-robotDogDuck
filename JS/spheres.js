@@ -17,7 +17,7 @@ export class Sphere
         let b = 2 * ray.direction.dot(ray.origin.minus(this.centre))
         let c = ray.origin.minus(this.centre).dot(ray.origin.minus(this.centre)) - Math.pow(this.radius, 2);
         let discriminant = Math.pow(b, 2) - (4 * a * c)
-        if (discriminant >= 0) {
+        if (discriminant > 0) {
             return ((0 - b) - Math.sqrt(discriminant)) / (2 * a) 
         }
         else if (discriminant < 0) {

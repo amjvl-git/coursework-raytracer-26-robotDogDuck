@@ -40,11 +40,19 @@ function backgroundColour(ray)
 }
 
 // Returns the colour the ray should have as a Vec3 with RGB values in [0,1]
+let lightDirection = new Vec3(-1.1, -1.3, -1.5).normalised();
+let negLightDirection = new Vec3(-lightDirection.x, -lightDirection.y, -lightDirection.z);
+
 function rayColour(ray) 
 {
-    let castResult = traceRay(ray)
-    if(castResult.t < 0) return backgroundColour(ray)
-    return new Vec3(1,0,0) // Red
+    let castResult = traceRay(ray);
+    if(castResult.t < 0) return backgroundColour(ray);
+    
+    let albedo = spheres[castResult.sphereIndex].colour;
+    let diffuse = Math.max(castResult.normal.dot(negLightDirection), 0);
+    let colour = albedo.scale(diffuse);
+
+    return colour
 }
 
 // Sets a pixel at (x, y) in the canvas with an RGB Vec3
@@ -70,6 +78,7 @@ const aspectRatio = document.getElementById("canvas").height / document.getEleme
 
 // Creates ctx and defines simple names
 const ctx = canvas.getContext("2d");
+
 
 let viewportWidth = 2;
 let viewportHeight = viewportWidth * aspectRatio;
