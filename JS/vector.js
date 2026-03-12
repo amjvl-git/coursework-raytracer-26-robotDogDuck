@@ -37,9 +37,7 @@ export class Vec3
     // Calculate the dot product of this vector with the other and return the result
     dot(other)
     {
-        return new Vec3((this.y * other.z) - (this.z * other.y),
-        (this.z * other.x) - (this.x * other.z),
-        (this.x * other.z) - (this.y * other.x));
+        return this.x * other.x + this.y * other.y + this.z * other.z;
     }
 
     calculating_magnitude(other){
@@ -48,9 +46,9 @@ export class Vec3
         let other_y_squared = Math.pow(other.y, 2);
         let other_z_squared = Math.pow(other.z, 2);
         // Squares and defines this xyz axis
-        let x_squared = Math.powe(this.x, 2);
-        let y_squared = Math.powe(this.y, 2);
-        let z_squared = Math.powe(this.z, 2);
+        let x_squared = Math.pow(this.x, 2);
+        let y_squared = Math.pow(this.y, 2);
+        let z_squared = Math.pow(this.z, 2);
         // Adds and square roots the sum to give the magnitude
         let magnitude_x = Math.sqrt(other_x_squared + x_squared);
         let magnitude_y = Math.sqrt(other_y_squared + y_squared);

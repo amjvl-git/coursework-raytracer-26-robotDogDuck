@@ -7,6 +7,7 @@ export class RayCastResult
 {
     constructor(position, normal, t, sphereIndex)
     {
+        // this.hit = hit
         this.position = position
         this.normal = normal
         this.t = t
