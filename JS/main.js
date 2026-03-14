@@ -3,9 +3,6 @@ import { Sphere } from "/JS/spheres.js"
 import { Ray } from "/JS/ray.js"
 import { RayCastResult } from "/JS/ray_cast_result.js"
 
-const sphere = new Sphere;
-const ray = new Ray;
-
 // Calculate the intersection point and normal when a ray hits a sphere. Returns a RayCastResult.
 function hit(ray, t, sphereIndex)
 {
@@ -55,6 +52,10 @@ function backgroundColour(ray)
 let lightDirection = new Vec3(-1.1, -1.3, -1.5).normalised();
 let negLightDirection = new Vec3(-lightDirection.x, -lightDirection.y, -lightDirection.z);
 
+let ambient = 0.2;
+let specular = 0.9;
+let shinyness = 50.0;
+
 function rayColour(ray) 
 {
     let castResult = traceRay(ray);
@@ -62,6 +63,9 @@ function rayColour(ray)
     
     let albedo = spheres[castResult.sphereIndex].colour;
     let diffuse = Math.max(castResult.normal.dot(negLightDirection), 0);
+    // let ambient = 0.2;
+    // let specular = 0.9;
+    // let shinyness = 50.0;
     let colour = albedo.scale(diffuse);
 
     return colour
@@ -94,9 +98,6 @@ const aspectRatio = document.getElementById("canvas").height / document.getEleme
 const viewportWidth = 2;
 const viewportHeight = viewportWidth * aspectRatio;
 const focalLength = 1.0;
-const ambient = 0.2;
-const specular = 0.9;
-const shinyness = 50.0;
 
 let camPosition = new Vec3(0, 0, 0);
 let horizontal = new Vec3(viewportWidth, 0, 0);
