@@ -24,7 +24,7 @@ function miss()
 // Check whether a ray hits anything in the scene and return a RayCast Result
 function traceRay(ray)
 {
-    let t = 10000000000000000000000000;
+    let t = 10000000;
     let closestSphereIndex = -1;
 
     // Find the sphere intersection closest to this ray
@@ -67,11 +67,10 @@ function rayColour(ray)
     return colour
 }
 
+
 // Sets a pixel at (x, y) in the canvas with an RGB Vec3
 function setPixel(x, y, colour)
 {
-    const c = document.getElementById("canvas")
-    const ctx = c.getContext("2d")
     ctx.fillStyle = "rgba("+colour.x+","+colour.y+","+colour.z+","+1+")"
     ctx.fillRect(x, c.height - y, 1, 1)
 }
@@ -80,21 +79,24 @@ const spheres = new Array(
     new Sphere(new Vec3(0,0,-1), 0.3, new Vec3(1,0,0)),       // Red sphere
     new Sphere(new Vec3(0,0.2,-0.8), 0.15, new Vec3(0,0,1)),  // Blue sphere
     new Sphere(new Vec3(0,-100.5,-1), 100, new Vec3(0,1,0))   // Big green sphere
-    );
+);
 
 
 // Main code
+const c = document.getElementById("canvas")
+const ctx = c.getContext("2d")
 const imageWidth = document.getElementById("canvas").width
 const imageHeight = document.getElementById("canvas").height
 const aspectRatio = document.getElementById("canvas").height / document.getElementById("canvas").width
 
-// Creates ctx and defines simple names
-const ctx = canvas.getContext("2d");
 
 
-let viewportWidth = 2;
-let viewportHeight = viewportWidth * aspectRatio;
-let focalLength = 1.0;
+const viewportWidth = 2;
+const viewportHeight = viewportWidth * aspectRatio;
+const focalLength = 1.0;
+const ambient = 0.2;
+const specular = 0.9;
+const shinyness = 50.0;
 
 let camPosition = new Vec3(0, 0, 0);
 let horizontal = new Vec3(viewportWidth, 0, 0);
@@ -107,9 +109,6 @@ for (let i = 0; i < imageWidth; i++)
 {
     for (let j = 0; j <= imageHeight; j++)
     {
-        // const u = (i + 0.5) / imageWidth * 2 - 1;
-        // const v = 1 - (j + 0.5) / imageHeight * 2;
-        // colour = hit(ray, 0).hit ? new Vec3(255, 0, 0) : new Vec3(0, 0, 255);
         let u = i / (imageWidth - 1);
         let v = j / (imageHeight - 1);
         
