@@ -28,6 +28,17 @@ export class Vec3
         return new Vec3(this.x * other.x, this.y * other.y, this.z * other.z);
     }
 
+    divide(other)
+    {
+        return new Vec3(this.x / other.x, this.y / other.y, this.z / other.z)
+    }
+
+    //////////////////////////////////////
+    invert(scalar)
+    {
+        return new Vec3(scalar / this.x, scalar / this.y, scalar / this.z);
+    }
+
     // Scale this vector by the number scalar and return the result
     scale(scalar)
     {
