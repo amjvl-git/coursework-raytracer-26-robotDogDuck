@@ -3,14 +3,49 @@ import { Sphere } from "/JS/spheres.js"
 import { Ray } from "/JS/ray.js"
 import { RayCastResult } from "/JS/ray_cast_result.js"
 
+const ray = new Ray;
+
+const c = document.getElementById("canvas")
+const ctx = c.getContext("2d")
+const imageWidth = document.getElementById("canvas").width
+const imageHeight = document.getElementById("canvas").height
+const aspectRatio = document.getElementById("canvas").height / document.getElementById("canvas").width
+
+// let ambience = 0.2;
+// let specular = 0.9;
+// let shinyness = 50.0;
+let camPosition = new Vec3(0, 0, 0);
+const viewportWidth = 2;
+const viewportHeight = viewportWidth * aspectRatio;
+const focalLength = 1.3;
+
+let colour = new Vec3(0, 0, 0);
+let horizontal = new Vec3(viewportWidth, 0, 0);
+let vertical = new Vec3(0, viewportHeight, 0);
+let lowerLeftCorner = camPosition.minus(horizontal.scale(0.5)).minus(vertical.scale(0.5)).minus(new Vec3(0, 0, focalLength));
+
+// Returns the colour the ray should have as a Vec3 with RGB values in [0,1]
+let lightSource = new Vec3(-1.1, -1.3, -1.5).normalised();
+let neglightSource = new Vec3(-lightSource.x, -lightSource.y, -lightSource.z);
+
+// function reflect(direction, normal){
+//     let normalLength = (direction, normal).dot().multiply(2);
+//     return sub(direction, mul(normal, normalLength))
+// }
+
+// Specular Light
+// const viewSource = camPosition.normalised();
+
 // Calculate the intersection point and normal when a ray hits a sphere. Returns a RayCastResult.
 function hit(ray, t, sphereIndex)
 {
     const intersectionPoint = ray.origin.add(ray.direction.scale(t));
     const intersectionNormal = intersectionPoint.minus(spheres[sphereIndex].centre).scale(1 / spheres[sphereIndex].radius);
-
+    //const reflectSource = reflect((-lightSource, intersectionNormal).normalised());
+    
     return new RayCastResult(intersectionPoint, intersectionNormal, t, sphereIndex);
 }
+
 
 // Return a RayCastResult when a ray misses everything in the scene
 function miss()
@@ -44,31 +79,59 @@ function backgroundColour(ray)
 {
     let white = new Vec3(1, 1, 1);
     let blue = new Vec3(0.3, 0.5, 0.9);
-    let t = 0.5 * (ray.direction.y+1.0);
+    let t = 0.5 * (ray.direction.y + 1.0);
     return white.scale(1 - t).add(blue.scale(t));
 }
 
-// Returns the colour the ray should have as a Vec3 with RGB values in [0,1]
-let lightDirection = new Vec3(-1.1, -1.3, -1.5).normalised();
-let negLightDirection = new Vec3(-lightDirection.x, -lightDirection.y, -lightDirection.z);
 
-let ambient = 0.2;
-let specular = 0.9;
-let shinyness = 50.0;
 
-function rayColour(ray) 
+
+
+
+
+
+class RaySmth
+{
+    specularPlusShadow(ray, t, sphereIndex) {
+        const intersectionPoint = ray.origin.add(ray.direction.scale(t));
+        const intersectionNormal = intersectionPoint.minus(spheres[sphereIndex].centre).scale(1 / spheres[sphereIndex].radius);
+        //const reflectSource = reflect((-lightSource, intersectionNormal).normalised());
+        const lightDir = lightSource.minus(intersectionPoint).normalised();
+        const shadowRay = new Ray(intersectionPoint.add(intersectionNormal.scale(0.001)), lightDir);
+        const shadowHit = rayIntersects(shadowRay);
+        
+        //const baseColor = spheres[RayCastResult.sphereIndex].colour.scale(1 / 255); // convert to 0..1 range
+        
+        const viewDir = ray.direction.scale(-1);
+        const reflectDir = lightDir.scale(-1).add(intersectionNormal.scale(2 * lightDir.dot(intersectionNormal))).normalised();
+        
+        
+        // const ambient = baseColor.scale(0.15);
+        // const diffuseFactor = Math.max(0, intersectionNormal.dot(lightDir));
+        // const diffuseColor = baseColor.scale(diffuseFactor);
+        
+        const specularFactor = Math.pow(Math.max(0, viewDir.dot(reflectDir)), Math.max(1, 0));
+        const specularColor = new Vec3(1, 1, 1).scale(specularFactor);
+        
+        return specularShadow = specularColor.multiply(shadowHit && spheres[RayCastResult.sphereIndex] != shadowHit.sphereIndex ? new Vec3(0.5, 0.5, 0.5) : new Vec3(1, 1, 1));
+    }
+}
+
+
+function rayColour(ray)
 {
     let castResult = traceRay(ray);
     if(castResult.t < 0) return backgroundColour(ray);
     
     let albedo = spheres[castResult.sphereIndex].colour;
-    let diffuse = Math.max(castResult.normal.dot(negLightDirection), 0);
-    // let ambient = 0.2;
-    // let specular = 0.9;
-    // let shinyness = 50.0;
-    let colour = albedo.scale(diffuse);
+    let diffuse = Math.max(castResult.normal.dot(neglightSource), 0);
+    // let lighting = albedo.multiply(0.0).add(diffuse.multiply(0.5)).add(specular.multiply(0.5));
+    let rays = new Ray(camPosition, lowerLeftCorner.add(horizontal.scale(u)).add(vertical.scale(v)).minus(camPosition));
+    //let colour = albedo;
+    let colour = albedo.scale(diffuse).add(new specularPlusShadow(rays));
+    // let colour = albedo.multiply(lighting);
 
-    return colour
+    return colour; //+ ambient + diffuse + specular;
 }
 
 
@@ -79,33 +142,24 @@ function setPixel(x, y, colour)
     ctx.fillRect(x, c.height - y, 1, 1)
 }
 
+// All the spheres in the scene
 const spheres = new Array(
-    new Sphere(new Vec3(0,0,-1), 0.3, new Vec3(1,0,0)),       // Red sphere
-    new Sphere(new Vec3(0,0.2,-0.8), 0.15, new Vec3(0,0,1)),  // Blue sphere
-    new Sphere(new Vec3(0,-100.5,-1), 100, new Vec3(0,1,0))   // Big green sphere
+    new Sphere(new Vec3(0,0,-1), 0.3, new Vec3(1,0,0)),                  // Red sphere
+    new Sphere(new Vec3(0,0.3,-0.85), 0.1, new Vec3(0,0,1)),             // Blue sphere
+    new Sphere(new Vec3(0,-100.5,-1), 100, new Vec3(0,1,0)),             // BIG green sphere
+    new Sphere(new Vec3(0.3,0.08,-0.85), 0.10, new Vec3(0,0.7,0.8)),     // Light Blue sphere
+    new Sphere(new Vec3(0.3,-0.17,-0.85), 0.1, new Vec3(0.9,0.5,0.13)),  // Orange sphere
+    new Sphere(new Vec3(0,-0.35,-0.85), 0.1, new Vec3(0.86,0.65,0.1)),   // Yellow sphere
+    new Sphere(new Vec3(-0.3,-0.17,-0.85), 0.1, new Vec3(0.9,0,0.6)),    // Purple sphere
+    new Sphere(new Vec3(-0.3,0.08,-0.85), 0.1, new Vec3(0.86,0,1)),      // Pink sphere
+    new Sphere(new Vec3(0.8,0.9,-1.6), 0.4, new Vec3(0,0.7,0.55)),       // Top Right BIG Light Green sphere
+    new Sphere(new Vec3(-0.8,0.9,-1.6), 0.4, new Vec3(0.2,0.9,0.5)),     // Top Left BIG Green sphere
+    new Sphere(new Vec3(0.19,-0.19,-0.3), 0.07, new Vec3(0.5,0.5,0.5)),  // Bottom Right BIG Grey sphere
+    new Sphere(new Vec3(-0.19,-0.19,-0.3), 0.07, new Vec3(0.5,0.3,0.02)) // Bottom Left BIG Brown sphere
 );
 
 
 // Main code
-const c = document.getElementById("canvas")
-const ctx = c.getContext("2d")
-const imageWidth = document.getElementById("canvas").width
-const imageHeight = document.getElementById("canvas").height
-const aspectRatio = document.getElementById("canvas").height / document.getElementById("canvas").width
-
-
-
-const viewportWidth = 2;
-const viewportHeight = viewportWidth * aspectRatio;
-const focalLength = 1.0;
-
-let camPosition = new Vec3(0, 0, 0);
-let horizontal = new Vec3(viewportWidth, 0, 0);
-let vertical = new Vec3(0, viewportHeight, 0);
-let lowerLeftCorner = camPosition.minus(horizontal.scale(0.5)).minus(vertical.scale(0.5)).minus(new Vec3(0, 0, focalLength));
-
-let colour = new Vec3(0, 0, 0);
-
 for (let i = 0; i < imageWidth; i++)
 {
     for (let j = 0; j <= imageHeight; j++)
@@ -113,7 +167,7 @@ for (let i = 0; i < imageWidth; i++)
         let u = i / (imageWidth - 1);
         let v = j / (imageHeight - 1);
         
-        let ray = new Ray(camPosition, lowerLeftCorner.add(horizontal.scale(u)).add(vertical.scale(v)).minus(camPosition));
+        //let ray = new Ray(camPosition, lowerLeftCorner.add(horizontal.scale(u)).add(vertical.scale(v)).minus(camPosition));
         colour = rayColour(ray).scale(255);
         setPixel(i, j, colour);
     }
