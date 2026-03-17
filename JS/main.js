@@ -7,20 +7,20 @@ const c = document.getElementById("canvas")
 const ctx = c.getContext("2d")
 const imageWidth = document.getElementById("canvas").width
 const imageHeight = document.getElementById("canvas").height
-const aspectRatio = document.getElementById("canvas").height / document.getElementById("canvas").width
+// const aspectRatio = document.getElementById("canvas").height / document.getElementById("canvas").width
 
 // let ambience = 0.2;
 // let specular = 0.9;
 // let shinyness = 50.0;
-let camPosition = new Vec3(0, 0, 0);
-const viewportWidth = 2;
-const viewportHeight = viewportWidth * aspectRatio;
-const focalLength = 1.3;
+// let camPosition = new Vec3(0, 0, 0);
+// const viewportWidth = 2;
+// const viewportHeight = viewportWidth * aspectRatio;
+// const focalLength = 1.3;
 
 let colour = new Vec3(0, 0, 0);
-let horizontal = new Vec3(viewportWidth, 0, 0);
-let vertical = new Vec3(0, viewportHeight, 0);
-let lowerLeftCorner = camPosition.minus(horizontal.scale(0.5)).minus(vertical.scale(0.5)).minus(new Vec3(0, 0, focalLength));
+// let horizontal = new Vec3(viewportWidth, 0, 0);
+// let vertical = new Vec3(0, viewportHeight, 0);
+// let lowerLeftCorner = camPosition.minus(horizontal.scale(0.5)).minus(vertical.scale(0.5)).minus(new Vec3(0, 0, focalLength));
 
 // Returns the colour the ray should have as a Vec3 with RGB values in [0,1]
 let lightSource = new Vec3(-1.1, -1.3, -1.5).normalised();
@@ -96,11 +96,11 @@ function specularPlusShadow(ray, t, sphereIndex) {
     const viewDir = ray.direction.scale(-1);
     const reflectDir = lightDir.scale(-1).add(intersectionNormal.scale(2 * lightDir.dot(intersectionNormal))).normalised();
     
-    const specularFactor = Math.pow(Math.max(0, viewDir.dot(reflectDir)), 30); // assuming shininess 50
+    const specularFactor = Math.pow(Math.max(0.94, viewDir.dot(reflectDir)), 33); // assuming shininess 50
     const specularColor = new Vec3(1, 1, 1).scale(specularFactor);
     
     const inShadow = shadowHit.t > 0 && shadowHit.sphereIndex != sphereIndex;
-    const shadowMultiplier = inShadow ? new Vec3(0.5, 0.5, 0.5) : new Vec3(1, 1, 1);
+    const shadowMultiplier = inShadow ? new Vec3(0.4, 0.4, 0.4) : new Vec3(0.8, 0.8, 0.8);
     
     return specularColor.multiply(shadowMultiplier);
 }
@@ -129,7 +129,7 @@ function setPixel(x, y, colour)
 // All the spheres in the scene
 const spheres = new Array(
     new Sphere(new Vec3(0,0,-1), 0.3, new Vec3(1,0,0)),                  // Red sphere
-    new Sphere(new Vec3(0,0.3,-0.85), 0.1, new Vec3(0,0,1)),             // Blue sphere
+    new Sphere(new Vec3(0,0.25,-0.8), 0.15, new Vec3(0,0,1)),             // Blue sphere
     new Sphere(new Vec3(0,-100.5,-1), 100, new Vec3(0,1,0)),             // BIG green sphere
     new Sphere(new Vec3(0.3,0.08,-0.85), 0.10, new Vec3(0,0.7,0.8)),     // Light Blue sphere
     new Sphere(new Vec3(0.3,-0.17,-0.85), 0.1, new Vec3(0.9,0.5,0.13)),  // Orange sphere
@@ -138,8 +138,8 @@ const spheres = new Array(
     new Sphere(new Vec3(-0.3,0.08,-0.85), 0.1, new Vec3(0.86,0,1)),      // Pink sphere
     new Sphere(new Vec3(0.8,0.9,-1.6), 0.4, new Vec3(0,0.7,0.55)),       // Top Right BIG Light Green sphere
     new Sphere(new Vec3(-0.8,0.9,-1.6), 0.4, new Vec3(0.2,0.9,0.5)),     // Top Left BIG Green sphere
-    new Sphere(new Vec3(0.19,-0.19,-0.3), 0.07, new Vec3(0.5,0.5,0.5)),  // Bottom Right BIG Grey sphere
-    new Sphere(new Vec3(-0.19,-0.19,-0.3), 0.07, new Vec3(0.5,0.3,0.02)) // Bottom Left BIG Brown sphere
+    new Sphere(new Vec3(0.19,-0.3,-0.5), 0.07, new Vec3(0.5,0.5,0.5)),  // Bottom Right BIG Grey sphere
+    new Sphere(new Vec3(-0.19,-0.3,-0.5), 0.07, new Vec3(0.5,0.3,0.02)) // Bottom Left BIG Brown sphere
 );
 
 
