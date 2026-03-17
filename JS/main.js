@@ -129,9 +129,12 @@ function rayColour(ray)
     const inShadow = shadowHit.t > 0 && shadowHit.sphereIndex != castResult.sphereIndex;
     const shadowMultiplier = inShadow ? new Vec3(0.4, 0.4, 0.4) : new Vec3(0.8, 0.8, 0.8);
 
-    let gamma = 2.2;
-    let colour = ambient.add(diffuseColor).add(specularColor).multiply(shadowMultiplier);
-    let gammaCorrection = new Vec3(Math.pow(colour.x, 1/gamma), Math.pow(colour.y, 1/gamma), Math.pow(colour.z, 1/gamma));
+    const gamma = 2.2;
+    const colour = ambient.add(diffuseColor).add(specularColor).multiply(shadowMultiplier);
+    const gammaCorrection = new Vec3(Math.pow(colour.x, 1/gamma), Math.pow(colour.y, 1/gamma), Math.pow(colour.z, 1/gamma));
+
+    const Multisampling = new Ray(castResult.origin);
+    const n = 50;
 
     return new Vec3(Math.min(1, gammaCorrection.x), Math.min(1, gammaCorrection.y), Math.min(1, gammaCorrection.z));
 }
