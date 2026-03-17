@@ -23,8 +23,7 @@ let colour = new Vec3(0, 0, 0);
 // let lowerLeftCorner = camPosition.minus(horizontal.scale(0.5)).minus(vertical.scale(0.5)).minus(new Vec3(0, 0, focalLength));
 
 // Returns the colour the ray should have as a Vec3 with RGB values in [0,1]
-let lightSource = new Vec3(-1.1, -1.3, -1.5).normalised();
-let neglightSource = new Vec3(-lightSource.x, -lightSource.y, -lightSource.z);
+let lightSource = new Vec3(1, 1, 0);
 
 // function reflect(direction, normal){
 //     let normalLength = (direction, normal).dot().multiply(2);
@@ -82,40 +81,57 @@ function backgroundColour(ray)
 }
 
 
-// Calculate specular lighting with shadow
-function specularPlusShadow(ray, t, sphereIndex) {
-    const intersectionPoint = ray.origin.add(ray.direction.scale(t));
-    const intersectionNormal = intersectionPoint.minus(spheres[sphereIndex].centre).scale(1 / spheres[sphereIndex].radius);
-    const lightDir = neglightSource;
-    const shadowRay = new Ray(intersectionPoint.add(intersectionNormal.scale(0.001)), lightDir);
-    const shadowHit = traceRay(shadowRay);
+// // Calculate specular lighting with shadow
+// function specularPlusShadow(ray, t, sphereIndex) {
+//     const intersectionPoint = ray.origin.add(ray.direction.scale(t));
+//     const intersectionNormal = intersectionPoint.minus(spheres[sphereIndex].centre).scale(1 / spheres[sphereIndex].radius);
+//     const lightDir = lightSource;
+//     const shadowRay = new Ray(intersectionPoint.add(intersectionNormal.scale(0.001)), lightDir);
+//     const shadowHit = traceRay(shadowRay);
 
-    // let ray = new Ray(point, vector);
-    // (this.closestDistanceAlongRay(ray) <= distanceToLight);
+//     // let ray = new Ray(point, vector);
+//     // (this.closestDistanceAlongRay(ray) <= distanceToLight);
     
-    const viewDir = ray.direction.scale(-1);
-    const reflectDir = lightDir.scale(-1).add(intersectionNormal.scale(2 * lightDir.dot(intersectionNormal))).normalised();
+//     const viewDir = ray.direction.scale(-1);
+//     const reflectDir = lightDir.scale(-1).add(intersectionNormal.scale(2 * lightDir.dot(intersectionNormal))).normalised();
     
-    const specularFactor = Math.pow(Math.max(0.94, viewDir.dot(reflectDir)), 33); // assuming shininess 50
-    const specularColor = new Vec3(1, 1, 1).scale(specularFactor);
+//     const specularFactor = Math.pow(Math.max(0, viewDir.dot(reflectDir)), Math.max(1, 30)); // assuming shininess 50
+//     const specularColor = new Vec3(1, 1, 1).scale(specularFactor);
     
-    const inShadow = shadowHit.t > 0 && shadowHit.sphereIndex != sphereIndex;
-    const shadowMultiplier = inShadow ? new Vec3(0.4, 0.4, 0.4) : new Vec3(0.8, 0.8, 0.8);
+//     const inShadow = shadowHit.t > 0 && shadowHit.sphereIndex != sphereIndex;
+//     const shadowMultiplier = inShadow ? new Vec3(0.4, 0.4, 0.4) : new Vec3(0.8, 0.8, 0.8);
     
-    return specularColor.multiply(shadowMultiplier);
-}
+//     return specularColor.multiply(shadowMultiplier);
+// }
 
 
 function rayColour(ray)
 {
-    let castResult = traceRay(ray);
+    const castResult = traceRay(ray);
     if(castResult.t < 0) return backgroundColour(ray);
-    
-    let albedo = spheres[castResult.sphereIndex].colour;
-    let diffuse = Math.max(castResult.normal.dot(neglightSource), 0);
-    let colour = albedo.scale(diffuse).add(specularPlusShadow(ray, castResult.t, castResult.sphereIndex));
+    const lightDir = lightSource.minus(castResult.position).normalised();
 
-    return colour;
+    const  albedo = spheres[castResult.sphereIndex].colour;
+    const ambient = albedo.scale(0.05);
+    const diffuseScale = Math.max(0, castResult.normal.dot(lightDir));
+    const diffuseColor = albedo.scale(diffuseScale);
+
+    const shadowRay = new Ray(castResult.position.add(castResult.normal.scale(0.001)), lightDir);
+    const shadowHit = traceRay(shadowRay);
+
+    const viewDir = ray.direction.normalised().scale(-1);
+    const reflectDir = lightDir.scale(-1).add(castResult.normal.scale(2 * lightDir.dot(castResult.normal))).normalised();
+    
+    const shininess = spheres[castResult.sphereIndex].specular * 30;
+    const specularFactor = Math.pow(Math.max(0, viewDir.dot(reflectDir)), shininess);
+    const specularColor = new Vec3(1, 1, 1).scale(specularFactor * 0.5);
+    
+    const inShadow = shadowHit.t > 0 && shadowHit.sphereIndex != castResult.sphereIndex;
+    const shadowMultiplier = inShadow ? new Vec3(0.4, 0.4, 0.4) : new Vec3(0.8, 0.8, 0.8);
+
+    let colour = ambient.add(diffuseColor).add(specularColor).multiply(shadowMultiplier);
+
+    return new Vec3(Math.min(1, colour.x), Math.min(1, colour.y), Math.min(1, colour.z));
 }
 
 
@@ -128,18 +144,18 @@ function setPixel(x, y, colour)
 
 // All the spheres in the scene
 const spheres = new Array(
-    new Sphere(new Vec3(0,0,-1), 0.3, new Vec3(1,0,0)),                  // Red sphere
-    new Sphere(new Vec3(0,0.25,-0.8), 0.15, new Vec3(0,0,1)),             // Blue sphere
-    new Sphere(new Vec3(0,-100.5,-1), 100, new Vec3(0,1,0)),             // BIG green sphere
-    new Sphere(new Vec3(0.3,0.08,-0.85), 0.10, new Vec3(0,0.7,0.8)),     // Light Blue sphere
-    new Sphere(new Vec3(0.3,-0.17,-0.85), 0.1, new Vec3(0.9,0.5,0.13)),  // Orange sphere
-    new Sphere(new Vec3(0,-0.35,-0.85), 0.1, new Vec3(0.86,0.65,0.1)),   // Yellow sphere
-    new Sphere(new Vec3(-0.3,-0.17,-0.85), 0.1, new Vec3(0.9,0,0.6)),    // Purple sphere
-    new Sphere(new Vec3(-0.3,0.08,-0.85), 0.1, new Vec3(0.86,0,1)),      // Pink sphere
-    new Sphere(new Vec3(0.8,0.9,-1.6), 0.4, new Vec3(0,0.7,0.55)),       // Top Right BIG Light Green sphere
-    new Sphere(new Vec3(-0.8,0.9,-1.6), 0.4, new Vec3(0.2,0.9,0.5)),     // Top Left BIG Green sphere
-    new Sphere(new Vec3(0.19,-0.3,-0.5), 0.07, new Vec3(0.5,0.5,0.5)),  // Bottom Right BIG Grey sphere
-    new Sphere(new Vec3(-0.19,-0.3,-0.5), 0.07, new Vec3(0.5,0.3,0.02)) // Bottom Left BIG Brown sphere
+    new Sphere(new Vec3(0,0,-1), 0.3, new Vec3(1,0,0), 1.0),                  // Red sphere
+    new Sphere(new Vec3(0,0.25,-0.8), 0.15, new Vec3(0,0,1), 0.9),             // Blue sphere
+    new Sphere(new Vec3(0,-100.5,-1), 100, new Vec3(0,1,0), 0.2),             // BIG green sphere
+    new Sphere(new Vec3(0.3,0.08,-0.85), 0.10, new Vec3(0,0.7,0.8), 0.9),     // Light Blue sphere
+    new Sphere(new Vec3(0.3,-0.17,-0.85), 0.1, new Vec3(0.9,0.5,0.13), 0.9),  // Orange sphere
+    new Sphere(new Vec3(0,-0.35,-0.85), 0.1, new Vec3(0.86,0.65,0.1), 0.9),   // Yellow sphere
+    new Sphere(new Vec3(-0.3,-0.17,-0.85), 0.1, new Vec3(0.9,0,0.6), 0.2),    // Purple sphere
+    new Sphere(new Vec3(-0.3,0.08,-0.85), 0.1, new Vec3(0.86,0,1), 0.9),      // Pink sphere
+    new Sphere(new Vec3(0.8,0.9,-1.6), 0.4, new Vec3(0,0.7,0.55), 0.9),       // Top Right BIG Light Green sphere
+    new Sphere(new Vec3(-0.8,0.9,-1.6), 0.4, new Vec3(0.2,0.9,0.5), 0.9),     // Top Left BIG Green sphere
+    new Sphere(new Vec3(0.19,-0.3,-0.5), 0.07, new Vec3(0.5,0.5,0.5), 0.2),  // Bottom Right BIG Grey sphere
+    new Sphere(new Vec3(-0.19,-0.3,-0.5), 0.07, new Vec3(0.5,0.3,0.02), 0.9) // Bottom Left BIG Brown sphere
 );
 
 

@@ -1,11 +1,12 @@
 // A sphere in 3D space. Has centre, radius and colour all of which are Vec3s
 export class Sphere
 {
-    constructor (centre, radius, colour)
+    constructor (centre, radius, colour, specular)
     {
-        this.centre = centre
-        this.radius = radius
-        this.colour = colour
+        this.centre = centre;
+        this.radius = radius;
+        this.colour = colour;
+        this.specular = specular;
     }
 
     // Calculate the point on the sphere  where the ray intersects using 
