@@ -98,19 +98,22 @@ function setPixel(x, y, colour)
 
 // Event listener that toggles how shiny spheres can be
 // Connect slider to shiny value
-const shinySlider = document.getElementById("shinySlider");
-const shinyValue = document.getElementById("shinyValue");
+let shinySlider = document.getElementById("shinySlider");
+let shinyValue = document.getElementById("shinyValue");
 
 shinySlider.addEventListener("input", function() {
     shiny = this.value / 100;
     shinyValue.textContent = this.value + "%";
+        // Update specular values for all spheres
+    spheres.forEach(sphere => {
+        sphere.specular = shiny;
+    });
 });
-
 // Set initial shinyness
 let shiny = shinySlider.value / 100;
 
 // All the spheres in the scene
-const spheres = new Array(
+let spheres = new Array(
     new Sphere(new Vec3(0,0,-1), 0.3, new Vec3(1,0,0), shiny),                  // Red sphere
     new Sphere(new Vec3(0,0.25,-0.8), 0.15, new Vec3(0,0,1), shiny),             // Blue sphere
     new Sphere(new Vec3(0,-100.5,-1), 100, new Vec3(0,1,0), shiny),             // BIG green sphere
@@ -127,7 +130,7 @@ const spheres = new Array(
 
 
 // Main code with multisampling for anti-aliasing
-const samplesPerPixel = 4;
+const samplesPerPixel = 6;
 
 function render(){
     for (let i = 0; i < imageWidth; i++)
@@ -169,4 +172,3 @@ render_button.addEventListener("click", function(){
 // Event listener that toggles "Diffuse" render
 // Event listener that toggles "Specular" render
 // Event listener that toggles more spheres
-// Event listener that toggles how shiny spheres can be
