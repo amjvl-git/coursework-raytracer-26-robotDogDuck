@@ -3,11 +3,14 @@ body {
     background-color: rgb(50, 56, 65);
 }
 
+/* Sets text to be white */
 #whiteText
 {
     color: white;
     text-align:center;
 }
+
+/* Makes the canvas be centered */
 canvas
 {
     display: block;

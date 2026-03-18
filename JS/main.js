@@ -11,6 +11,38 @@ const imageHeight = document.getElementById("canvas").height
 let colour = new Vec3(0, 0, 0);
 let lightSource = new Vec3(1, 1, 0);
 
+// Event listener that toggles how shiny spheres can be
+// Connect slider to shiny value
+let shinySlider = document.getElementById("shinySlider");
+let shinyValue = document.getElementById("shinyValue");
+
+shinySlider.addEventListener("input", function() {
+    shiny = this.value / 100;
+    shinyValue.textContent = this.value + "%";
+        // Update specular values for all spheres
+    spheres.forEach(sphere => {
+        sphere.specular = shiny;
+    });
+});
+// Set initial shinyness
+let shiny = shinySlider.value / 100;
+
+// All the spheres in the scene
+let spheres = new Array(
+    new Sphere(new Vec3(0,0,-1), 0.3, new Vec3(1,0,0), shiny),                  // Red sphere
+    new Sphere(new Vec3(0,0.25,-0.8), 0.15, new Vec3(0,0,1), shiny),             // Blue sphere
+    new Sphere(new Vec3(0,-100.5,-1), 100, new Vec3(0,1,0), shiny),             // BIG green sphere
+    new Sphere(new Vec3(0.3,0.08,-0.85), 0.10, new Vec3(0,0.7,0.8), shiny),     // Light Blue sphere
+    new Sphere(new Vec3(0.3,-0.17,-0.85), 0.1, new Vec3(0.9,0.5,0.13), shiny),  // Orange sphere
+    new Sphere(new Vec3(0,-0.35,-0.85), 0.1, new Vec3(0.86,0.65,0.1), shiny),   // Yellow sphere
+    new Sphere(new Vec3(-0.3,-0.17,-0.85), 0.1, new Vec3(0.9,0,0.6), shiny),    // Purple sphere
+    new Sphere(new Vec3(-0.3,0.08,-0.85), 0.1, new Vec3(0.86,0,1), shiny),      // Pink sphere
+    new Sphere(new Vec3(0.8,0.9,-1.6), 0.4, new Vec3(0,0.7,0.55), shiny),       // Top Right BIG Light Green sphere
+    new Sphere(new Vec3(-0.8,0.9,-1.6), 0.4, new Vec3(0.2,0.9,0.5), shiny),     // Top Left BIG Green sphere
+    new Sphere(new Vec3(0.19,-0.3,-0.5), 0.07, new Vec3(0.5,0.5,0.5), shiny),  // Bottom Right BIG Grey sphere
+    new Sphere(new Vec3(-0.19,-0.3,-0.5), 0.07, new Vec3(0.5,0.3,0.02), shiny) // Bottom Left BIG Brown sphere
+);
+
 // Calculate the intersection point and normal when a ray hits a sphere. Returns a RayCastResult.
 function hit(ray, t, sphereIndex)
 {
@@ -57,36 +89,63 @@ function backgroundColour(ray)
     return white.scale(1 - t).add(blue.scale(t));
 }
 
-function rayColour(ray)
-{
+function rayColour(ray) {
     const castResult = traceRay(ray);
     if(castResult.t < 0) return backgroundColour(ray);
-    const lightDir = lightSource.minus(castResult.position).normalised();
 
     const albedo = spheres[castResult.sphereIndex].colour;
-    const ambient = albedo.scale(0.05);
-    const diffuseScale = Math.max(0, castResult.normal.dot(lightDir));
-    const diffuseColor = albedo.scale(diffuseScale);
 
-    const shadowRay = new Ray(castResult.position.add(castResult.normal.scale(0.001)), lightDir);
-    const shadowHit = traceRay(shadowRay);
-
-    const viewDir = ray.direction.normalised().scale(-1);
-    const reflectDir = lightDir.scale(-1).add(castResult.normal.scale(2 * lightDir.dot(castResult.normal))).normalised();
-    
-    const shininess = spheres[castResult.sphereIndex].specular * 50;
-    const specularFactor = Math.pow(Math.max(0, viewDir.dot(reflectDir)), shininess);
-    const specularColor = new Vec3(1, 1, 1).scale(specularFactor * 0.5);
-    
-    const inShadow = shadowHit.t > 0 && shadowHit.sphereIndex != castResult.sphereIndex;
-    const shadowMultiplier = inShadow ? new Vec3(0.4, 0.4, 0.4) : new Vec3(0.8, 0.8, 0.8);
-
-    const gamma = 2.2;
-    const colour = ambient.add(diffuseColor).add(specularColor).multiply(shadowMultiplier);
-    const gammaCorrection = new Vec3(Math.pow(colour.x, 1/gamma), Math.pow(colour.y, 1/gamma), Math.pow(colour.z, 1/gamma));
-
-    return new Vec3(Math.min(1, gammaCorrection.x), Math.min(1, gammaCorrection.y), Math.min(1, gammaCorrection.z));
+    return colour;
 }
+
+// Event listener that toggles "Ambient" render
+const ambientButton = document.getElementById("ambientButton")
+render_button.addEventListener("click", function(){
+    function rayColour(ray) {
+        const castResult = traceRay(ray);
+        if(castResult.t < 0) return backgroundColour(ray);
+
+        const albedo = spheres[castResult.sphereIndex].colour;
+        const ambient = albedo.scale(0.05);
+
+        const gamma = 2.2;
+        const colour = ambient;
+        const gammaCorrection = new Vec3(Math.pow(colour.x, 1/gamma), Math.pow(colour.y, 1/gamma), Math.pow(colour.z, 1/gamma));
+
+        return new Vec3(Math.min(1, gammaCorrection.x), Math.min(1, gammaCorrection.y), Math.min(1, gammaCorrection.z));
+}})
+
+const phongModelButton = document.getElementById("phongModelButton")
+render_button.addEventListener("click", function(){
+    function rayColour(ray) {
+        const castResult = traceRay(ray);
+        if(castResult.t < 0) return backgroundColour(ray);
+        const lightDir = lightSource.minus(castResult.position).normalised();
+
+        const albedo = spheres[castResult.sphereIndex].colour;
+        const ambient = albedo.scale(0.05);
+        const diffuseScale = Math.max(0, castResult.normal.dot(lightDir));
+        const diffuseColor = albedo.scale(diffuseScale);
+
+        const shadowRay = new Ray(castResult.position.add(castResult.normal.scale(0.001)), lightDir);
+        const shadowHit = traceRay(shadowRay);
+
+        const viewDir = ray.direction.normalised().scale(-1);
+        const reflectDir = lightDir.scale(-1).add(castResult.normal.scale(2 * lightDir.dot(castResult.normal))).normalised();
+        
+        const shininess = spheres[castResult.sphereIndex].specular * 50;
+        const specularFactor = Math.pow(Math.max(0, viewDir.dot(reflectDir)), shininess);
+        const specularColor = new Vec3(1, 1, 1).scale(specularFactor * 0.5);
+        
+        const inShadow = shadowHit.t > 0 && shadowHit.sphereIndex != castResult.sphereIndex;
+        const shadowMultiplier = inShadow ? new Vec3(0.4, 0.4, 0.4) : new Vec3(0.8, 0.8, 0.8);
+
+        const gamma = 2.2;
+        const colour = ambient.add(diffuseColor).add(specularColor).multiply(shadowMultiplier);
+        const gammaCorrection = new Vec3(Math.pow(colour.x, 1/gamma), Math.pow(colour.y, 1/gamma), Math.pow(colour.z, 1/gamma));
+
+        return new Vec3(Math.min(1, gammaCorrection.x), Math.min(1, gammaCorrection.y), Math.min(1, gammaCorrection.z));
+}})
 
 
 // Sets a pixel at (x, y) in the canvas with an RGB Vec3
@@ -95,39 +154,6 @@ function setPixel(x, y, colour)
     ctx.fillStyle = "rgba("+colour.x+","+colour.y+","+colour.z+","+1+")"
     ctx.fillRect(x, c.height - y, 1, 1)
 }
-
-// Event listener that toggles how shiny spheres can be
-// Connect slider to shiny value
-let shinySlider = document.getElementById("shinySlider");
-let shinyValue = document.getElementById("shinyValue");
-
-shinySlider.addEventListener("input", function() {
-    shiny = this.value / 100;
-    shinyValue.textContent = this.value + "%";
-        // Update specular values for all spheres
-    spheres.forEach(sphere => {
-        sphere.specular = shiny;
-    });
-});
-// Set initial shinyness
-let shiny = shinySlider.value / 100;
-
-// All the spheres in the scene
-let spheres = new Array(
-    new Sphere(new Vec3(0,0,-1), 0.3, new Vec3(1,0,0), shiny),                  // Red sphere
-    new Sphere(new Vec3(0,0.25,-0.8), 0.15, new Vec3(0,0,1), shiny),             // Blue sphere
-    new Sphere(new Vec3(0,-100.5,-1), 100, new Vec3(0,1,0), shiny),             // BIG green sphere
-    new Sphere(new Vec3(0.3,0.08,-0.85), 0.10, new Vec3(0,0.7,0.8), shiny),     // Light Blue sphere
-    new Sphere(new Vec3(0.3,-0.17,-0.85), 0.1, new Vec3(0.9,0.5,0.13), shiny),  // Orange sphere
-    new Sphere(new Vec3(0,-0.35,-0.85), 0.1, new Vec3(0.86,0.65,0.1), shiny),   // Yellow sphere
-    new Sphere(new Vec3(-0.3,-0.17,-0.85), 0.1, new Vec3(0.9,0,0.6), shiny),    // Purple sphere
-    new Sphere(new Vec3(-0.3,0.08,-0.85), 0.1, new Vec3(0.86,0,1), shiny),      // Pink sphere
-    new Sphere(new Vec3(0.8,0.9,-1.6), 0.4, new Vec3(0,0.7,0.55), shiny),       // Top Right BIG Light Green sphere
-    new Sphere(new Vec3(-0.8,0.9,-1.6), 0.4, new Vec3(0.2,0.9,0.5), shiny),     // Top Left BIG Green sphere
-    new Sphere(new Vec3(0.19,-0.3,-0.5), 0.07, new Vec3(0.5,0.5,0.5), shiny),  // Bottom Right BIG Grey sphere
-    new Sphere(new Vec3(-0.19,-0.3,-0.5), 0.07, new Vec3(0.5,0.3,0.02), shiny) // Bottom Left BIG Brown sphere
-);
-
 
 // Main code with multisampling for anti-aliasing
 const samplesPerPixel = 6;
@@ -168,7 +194,6 @@ render_button.addEventListener("click", function(){
     shiny = 0;
 })
 
-// Event listener that toggles "Ambient" render
 // Event listener that toggles "Diffuse" render
 // Event listener that toggles "Specular" render
 // Event listener that toggles more spheres

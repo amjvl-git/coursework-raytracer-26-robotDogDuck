@@ -23,10 +23,18 @@
     </div>
     <!-- SETTINGS -->
     <h2 id="whiteText">Settings:</h2>
+    <!-- Specular adjustment slider -->
     <div class="slider-container">
         <label for="shinySlider">Specular val:</label>
         <input type="range" min="0" max="100" value="50" id="shinySlider" class="slider">
         <span id="shinyValue">50%</span>
+    </div>
+    <!-- Ambient, Diffuse, Specular & Phong Lighting button -->
+     <div class="button-container">
+        <button id="ambientButton" type="button">Ambient only</button>
+        <button id="diffuseButton" type="button">Diffuse only</button>
+        <button id="specularButton" type="button">Specular only</button>
+        <button id="phongModelButton" type="button">Phong Model</button>
     </div>
     <!-- Text "Bonus" -->
     <p id="whiteText">Bonus settings:</p>
