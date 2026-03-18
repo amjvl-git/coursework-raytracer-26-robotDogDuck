@@ -7,14 +7,74 @@
     <title>Javascript Raytracing</title>
     <link rel="stylesheet" href="style.css">
     <link rel="shortcut icon" href="img/gradient.png" />
-    <style>canvas {
-        /* displays the canvas in the middle */
-        display: block;
-        margin: 0 auto;
-    }</style>
 </head>
+
 <body>
-    <canvas id="canvas" width="720" height="720" style="border:5px solid#000000;">
+    <!-- Text introduction -->
+    <h1 id="whiteText">Ray Tracer</h1>
+    <p id="whiteText">An assignment for the raytracing project.</p>
+    <p id="whiteText">Made by Denis Saracev - P2922929.</p>
+    <!-- Canvas -->
+    <canvas id="canvas" width="650" height="650" style="border:5px solid#000000;">
         Your browser does not support the HTML canvas tag.</canvas>
+    <!-- Render Button -->
+    <div class="button-container">
+        <button id="render_button">Render Image</button>
+    </div>
+    <!-- SETTINGS -->
+    <h2 id="whiteText">Settings:</h2>
+    <div class="slider-container">
+        <label for="shinySlider">Value:</label>
+        <input type="range" min="0" max="100" value="50" id="shinySlider" class="slider">
+        <span id="shinyValue">50%</span>
+    </div>
+    <!-- Text "Bonus" -->
+    <p id="whiteText">Bonus settings:</p>
+    <!-- Audio track -->
+    <audio id="myAudio">
+        <source src="24_frames_song.mp3" type="audio/mp3">
+        Your browser does not support the audio element.
+    </audio>
+    <!-- This creates 2 music buttons -->
+    <div class="button-container">
+        <button onclick="playAudio()" type="button">Play Music</button>
+        <button onclick="pauseAudio()" type="button">Pause Music</button>
+    </div>
+    <!-- This is a volume slider -->
+    <div class="slider-container">
+        <label for="volumeSlider">Volume:</label>
+        <input type="range" min="0" max="100" value="20" id="volumeSlider" class="slider">
+        <span id="volumeValue">20%</span>
+    </div>
+
+    <script>
+        // VOLUME settings
+        // Creates a button which plays music!
+        let audioElement = document.getElementById("myAudio"); 
+        // Button that plays audio
+        function playAudio()
+        { 
+            audioElement.play(); 
+        } 
+        // Button that Pauses audio
+        function pauseAudio()
+        { 
+            audioElement.pause(); 
+        }
+        // Loops the audio, so it keeps playing for infinity
+        audioElement.loop = true;
+        
+        // Connect slider to audio volume
+        const volumeSlider = document.getElementById("volumeSlider");
+        const volumeValue = document.getElementById("volumeValue");
+        
+        volumeSlider.addEventListener("input", function() {
+            audioElement.volume = this.value / 100;
+            volumeValue.textContent = this.value + "%";
+        });
+        
+        // Set initial volume
+        audioElement.volume = volumeSlider.value / 100;
+    </script>
 </body>
 </html>
