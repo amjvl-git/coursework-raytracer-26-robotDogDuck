@@ -18,7 +18,7 @@
     <canvas id="canvas" width="650" height="650" style="border:5px solid#000000;">
         Your browser does not support the HTML canvas tag.</canvas>
     <!-- Render Button -->
-    <p id="whiteText">This will render the scene in Phong Lighting model, included with shadows,</p>
+    <p id="whiteText">This button will render the scene in Phong Lighting model, included with shadows,</p>
     <p id="whiteText">Gamma Correction and Multisampling enabled:</p>
     <div class="button-container">
         <button id="render_button">Render Image</button>
@@ -44,35 +44,43 @@
     <h4 id="whiteText">Adjust the Camera position coordinates:</h4>
     <div class="slider-container">
         <label for="cameraPositionX">X:</label>
-        <input type="range" min="0" max="100" value="0" id="cameraPositionX" class="slider">
-        <span id="camPosXValue">0%</span>
+        <input type="range" min="0" max="100" value="50" id="cameraPositionX" class="slider">
+        <span id="camPosXValue">50%</span>
     </div>
     <div class="slider-container">
-        <label for="cameraPositionY">X:</label>
-        <input type="range" min="0" max="100" value="0" id="cameraPositionY" class="slider">
-        <span id="camPosYValue">0%</span>
+        <label for="cameraPositionY">Y:</label>
+        <input type="range" min="0" max="100" value="50" id="cameraPositionY" class="slider">
+        <span id="camPosYValue">50%</span>
     </div>
     <div class="slider-container">
         <label for="cameraPositionZ">Z:</label>
-        <input type="range" min="0" max="100" value="0" id="cameraPositionZ" class="slider">
-        <span id="camPosZValue">0%</span>
+        <input type="range" min="0" max="100" value="50" id="cameraPositionZ" class="slider">
+        <span id="camPosZValue">50%</span>
     </div>
     <!-- Lighting position coordinate slider -->
     <h4 id="whiteText">Adjust the Lighting position coordinates:</h4>
     <div class="slider-container">
-        <label for="lightingPositionX">X:</label>
-        <input type="range" min="0" max="100" value="0" id="lightingPositionX" class="slider">
-        <span id="lightPosXValue">0%</span>
+        <label for="lightPositionSliderX">X:</label>
+        <input type="range" min="0" max="100" value="100" id="lightPositionSliderX" class="slider">
+        <span id="lightPosXValue">100%</span>
     </div>
     <div class="slider-container">
-        <label for="lightingPositionZ">Y:</label>
-        <input type="range" min="0" max="100" value="0" id="lightingPositionY" class="slider">
-        <span id="lightPosYValue">0%</span>
+        <label for="lightPositionSliderY">Y:</label>
+        <input type="range" min="0" max="100" value="100" id="lightPositionSliderY" class="slider">
+        <span id="lightPosYValue">100%</span>
     </div>
     <div class="slider-container">
-        <label for="lightingPositionZ">Z:</label>
-        <input type="range" min="0" max="100" value="0" id="lightingPositionZ" class="slider">
-        <span id="lightPosZValue">0%</span>
+        <label for="lightPositionSliderZ">Z:</label>
+        <input type="range" min="0" max="100" value="50" id="lightPositionSliderZ" class="slider">
+        <span id="lightPosZValue">50%</span>
+    </div>
+    <!-- Ambient, Diffuse, Specular & Phong Lighting button -->
+    <h4 id="whiteText">These buttons will select how much samples per pixel (multisampling) will be:</h4>
+    <div class="button-container">
+        <button id="multisamplingButton1" type="button">1x</button>
+        <button id="multisamplingButton4" type="button">4x</button>
+        <button id="multisamplingButton8" type="button">8x</button>
+        <button id="multisamplingButton14" type="button">14x</button>
     </div>
     <!-- Text "Bonus" -->
     <h1 id="hiddenText">.</h1>

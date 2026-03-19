@@ -2,12 +2,21 @@ import { Vec3 } from "/JS/vector.js"
 import { Sphere } from "/JS/spheres.js"
 import { Ray } from "/JS/ray.js"
 import { RayCastResult } from "/JS/ray_cast_result.js"
+import { render } from "/JS/functions"
+import { renderAmbientOnly } from "/JS/functions"
+import { renderDiffuseOnly } from "/JS/functions"
+import { renderSpecularOnly } from "/JS/functions"
 
 const c = document.getElementById("canvas")
 const ctx = c.getContext("2d")
 const imageWidth = document.getElementById("canvas").width
 const imageHeight = document.getElementById("canvas").height
 
+let camPosition = new Vec3(0, 0, 0);
+let lightSource = new Vec3(1, 1, 0);
+let colour = new Vec3(0, 0, 0);
+
+///////////////////////////////////////// CAMERA SETTINGS
 // Event listener that toggles coordinates for the camera
 // Connect slider to x, y, z values
 let camPositionSliderX = document.getElementById("cameraPositionX");
@@ -19,20 +28,75 @@ let camPosZValue = document.getElementById("camPosZValue");
 
 // X value slider
 camPositionSliderX.addEventListener("input", function() {
-    x = this.value / 100;
+    x = (this.value / 100) - 0.5;
     camPosXValue.textContent = this.value + "%";
+    camPosition = new Vec3(x, y, z);
     });
 
 // Set initial x coordinate
 let x = camPositionSliderX.value / 100;
 
+// Y value slider
+camPositionSliderY.addEventListener("input", function() {
+    y = (this.value / 100) - 0.5;
+    camPosYValue.textContent = this.value + "%";
+    camPosition = new Vec3(x, y, z);
+    });
 
-let camPosition = new Vec3(x, 0, 0);
-let lightSource = new Vec3(1, 1, 0);
-let colour = new Vec3(0, 0, 0);
+// Set initial x coordinate
+let y = camPositionSliderY.value / 100;
 
-alert("x is " + x);
+// Z value slider
+camPositionSliderZ.addEventListener("input", function() {
+    z = ((this.value / 100) - 0.5) * 10;
+    camPosZValue.textContent = this.value + "%";
+    camPosition = new Vec3(x, y, z);
+    });
 
+// Set initial x coordinate
+let z = camPositionSliderY.value / 100;
+
+/////////////////////////////////////// LIGHTING SETTINGS
+// Event listener that toggles coordinates for the lights
+// Connect slider to x, y, z values
+let lightPositionSliderX = document.getElementById("lightPositionSliderX");
+let lightPosXValue = document.getElementById("lightPosXValue");
+let lightPositionSliderY = document.getElementById("lightPositionSliderY");
+let lightPosYValue = document.getElementById("lightPosYValue");
+let lightPositionSliderZ = document.getElementById("lightPositionSliderZ");
+let lightPosZValue = document.getElementById("lightPosZValue");
+
+// X value slider
+lightPositionSliderX.addEventListener("input", function() {
+    xl = ((this.value / 100) - 0.5) * 10;
+    lightPosXValue.textContent = this.value + "%";
+    lightSource = new Vec3(xl, yl, zl);
+    });
+
+// Set initial x coordinate
+let xl = lightPositionSliderX.value / 100;
+
+// Y value slider
+lightPositionSliderY.addEventListener("input", function() {
+    yl = ((this.value / 100) - 0.5) * 10;
+    lightPosYValue.textContent = this.value + "%";
+    lightSource = new Vec3(xl, yl, zl);
+    });
+
+// Set initial x coordinate
+let yl = lightPositionSliderY.value / 100;
+
+// Z value slider
+lightPositionSliderZ.addEventListener("input", function() {
+    zl = ((this.value / 100) - 0.5) * 10;
+    lightPosZValue.textContent = this.value + "%";
+    lightSource = new Vec3(xl, yl, zl);
+    });
+
+// Set initial x coordinate
+let zl = lightPositionSliderZ.value / 100;
+
+///////////////////////////////////// SPECULAR SETTINGS
 // Event listener that toggles how shiny spheres can be
 // Connect slider to shiny value
 let shinySlider = document.getElementById("shinySlider");
@@ -51,18 +115,18 @@ let shiny = shinySlider.value / 100;
 
 // All the spheres in the scene
 let spheres = new Array(
-    new Sphere(new Vec3(0,0,-1), 0.3, new Vec3(1,0,0), shiny),                  // Red sphere
-    new Sphere(new Vec3(0,0.25,-0.8), 0.15, new Vec3(0,0,1), shiny),             // Blue sphere
-    new Sphere(new Vec3(0,-100.5,-1), 100, new Vec3(0,1,0), shiny),             // BIG green sphere
-    new Sphere(new Vec3(0.3,0.08,-0.85), 0.10, new Vec3(0,0.7,0.8), shiny),     // Light Blue sphere
-    new Sphere(new Vec3(0.3,-0.17,-0.85), 0.1, new Vec3(0.9,0.5,0.13), shiny),  // Orange sphere
-    new Sphere(new Vec3(0,-0.35,-0.85), 0.1, new Vec3(0.86,0.65,0.1), shiny),   // Yellow sphere
-    new Sphere(new Vec3(-0.3,-0.17,-0.85), 0.1, new Vec3(0.9,0,0.6), shiny),    // Purple sphere
-    new Sphere(new Vec3(-0.3,0.08,-0.85), 0.1, new Vec3(0.86,0,1), shiny),      // Pink sphere
-    new Sphere(new Vec3(0.8,0.9,-1.6), 0.4, new Vec3(0,0.7,0.55), shiny),       // Top Right BIG Light Green sphere
-    new Sphere(new Vec3(-0.8,0.9,-1.6), 0.4, new Vec3(0.2,0.9,0.5), shiny),     // Top Left BIG Green sphere
+    new Sphere(new Vec3(0,0,-1), 0.3, new Vec3(1,0,0), shiny),                 // Red sphere
+    new Sphere(new Vec3(0,0.25,-0.8), 0.15, new Vec3(0,0,1), shiny),           // Blue sphere
+    new Sphere(new Vec3(0.3,0.08,-0.85), 0.10, new Vec3(0,0.7,0.8), shiny),    // Light Blue sphere
+    new Sphere(new Vec3(0.3,-0.17,-0.85), 0.1, new Vec3(1,0.3,0), shiny),      // Orange sphere
+    new Sphere(new Vec3(0,-0.35,-0.85), 0.1, new Vec3(0.86,0.65,0.1), shiny),  // Yellow sphere
+    new Sphere(new Vec3(-0.3,-0.17,-0.85), 0.1, new Vec3(0.9,0,0.6), shiny),   // Purple sphere
+    new Sphere(new Vec3(-0.3,0.08,-0.85), 0.1, new Vec3(0.86,0,1), shiny),     // Pink sphere
+    new Sphere(new Vec3(0.8,0.9,-1.6), 0.4, new Vec3(0,0.7,0.55), shiny),      // Top Right BIG Light Green sphere
+    new Sphere(new Vec3(-0.8,0.9,-1.6), 0.4, new Vec3(0.2,0.9,0.5), shiny),    // Top Left BIG Green sphere
     new Sphere(new Vec3(0.19,-0.3,-0.5), 0.07, new Vec3(0.5,0.5,0.5), shiny),  // Bottom Right BIG Grey sphere
-    new Sphere(new Vec3(-0.19,-0.3,-0.5), 0.07, new Vec3(0.5,0.3,0.02), shiny) // Bottom Left BIG Brown sphere
+    new Sphere(new Vec3(-0.19,-0.3,-0.5), 0.07, new Vec3(0.7,0.7,0.7), shiny), // Bottom Left BIG Brown sphere
+    new Sphere(new Vec3(0,-100.5,-1), 100, new Vec3(0,1,0), shiny)             // Floor green BIG sphere
 );
 
 // Calculate the intersection point and normal when a ray hits a sphere. Returns a RayCastResult.
@@ -203,120 +267,7 @@ function setPixel(x, y, colour)
 }
 
 // Main code with multisampling for anti-aliasing
-const samplesPerPixel = 8;
-
-function render(){
-    for (let i = 0; i < imageWidth; i++)
-    {
-        for (let j = 0; j <= imageHeight; j++)
-        {
-            let accumulatedColor = new Vec3(0, 0, 0);
-            
-            // Cast multiple rays per pixel and average the results
-            for (let s = 0; s < samplesPerPixel; s++)
-            {
-                // Random offset within the pixel for better anti-aliasing
-                const randomX = Math.random();
-                const randomY = Math.random();
-                
-                const u = (i + randomX) / imageWidth * 2 - 1;
-                const v = (j + randomY) / imageHeight * 2 - 1;
-                
-                const ray = new Ray((camPosition), new Vec3(u, v, -1));
-                // const ray = new Ray(new Vec3(0, 1, 0), new Vec3(u, v, -1));
-                accumulatedColor = accumulatedColor.add(rayColour(ray));
-            }
-            
-            // Average the samples
-            colour = accumulatedColor.scale(255 / samplesPerPixel);
-            setPixel(i, j, colour);
-        }
-    }
-}
-
-function renderAmbientOnly() {
-    for (let i = 0; i < imageWidth; i++)
-    {
-        for (let j = 0; j <= imageHeight; j++)
-        {
-            let accumulatedColor = new Vec3(0, 0, 0);
-            
-            // Cast multiple rays per pixel and average the results
-            for (let s = 0; s < samplesPerPixel; s++)
-            {
-                // Random offset within the pixel for better anti-aliasing
-                const randomX = Math.random();
-                const randomY = Math.random();
-                
-                const u = (i + randomX) / imageWidth * 2 - 1;
-                const v = (j + randomY) / imageHeight * 2 - 1;
-                
-                const ray = new Ray(new Vec3(0, 0, 0), new Vec3(u, v, -1));
-                accumulatedColor = accumulatedColor.add(rayColourAmbientOnly(ray));
-            }
-            
-            // Average the samples
-            colour = accumulatedColor.scale(255 / samplesPerPixel);
-            setPixel(i, j, colour);
-        }
-    }
-}
-
-function renderDiffuseOnly() {
-    for (let i = 0; i < imageWidth; i++)
-    {
-        for (let j = 0; j <= imageHeight; j++)
-        {
-            let accumulatedColor = new Vec3(0, 0, 0);
-            
-            // Cast multiple rays per pixel and average the results
-            for (let s = 0; s < samplesPerPixel; s++)
-            {
-                // Random offset within the pixel for better anti-aliasing
-                const randomX = Math.random();
-                const randomY = Math.random();
-                
-                const u = (i + randomX) / imageWidth * 2 - 1;
-                const v = (j + randomY) / imageHeight * 2 - 1;
-                
-                const ray = new Ray(new Vec3(0, 0, 0), new Vec3(u, v, -1));
-                accumulatedColor = accumulatedColor.add(rayColourDiffuseOnly(ray));
-            }
-            
-            // Average the samples
-            colour = accumulatedColor.scale(255 / samplesPerPixel);
-            setPixel(i, j, colour);
-        }
-    }
-}
-
-function renderSpecularOnly() {
-    for (let i = 0; i < imageWidth; i++)
-    {
-        for (let j = 0; j <= imageHeight; j++)
-        {
-            let accumulatedColor = new Vec3(0, 0, 0);
-            
-            // Cast multiple rays per pixel and average the results
-            for (let s = 0; s < samplesPerPixel; s++)
-            {
-                // Random offset within the pixel for better anti-aliasing
-                const randomX = Math.random();
-                const randomY = Math.random();
-                
-                const u = (i + randomX) / imageWidth * 2 - 1;
-                const v = (j + randomY) / imageHeight * 2 - 1;
-                
-                const ray = new Ray(new Vec3(0, 0, 0), new Vec3(u, v, -1));
-                accumulatedColor = accumulatedColor.add(rayColourSpecularOnly(ray));
-            }
-            
-            // Average the samples
-            colour = accumulatedColor.scale(255 / samplesPerPixel);
-            setPixel(i, j, colour);
-        }
-    }
-}
+let samplesPerPixel = 4;
 
 // Event listener that renders the image out when the user presses the "Render Image" button
 const render_button = document.getElementById("render_button")
@@ -345,4 +296,23 @@ specularButton.addEventListener("click", function(){
     renderSpecularOnly();
 })
 
-// Event listener that toggles more spheres
+// Even listeners that toggle how much samples per pixel there will be
+const multisamplingButton1 = document.getElementById("multisamplingButton1")
+multisamplingButton1.addEventListener("click", function(){
+    samplesPerPixel = 1;
+})
+
+const multisamplingButton4 = document.getElementById("multisamplingButton4")
+multisamplingButton4.addEventListener("click", function(){
+    samplesPerPixel = 4;
+})
+
+const multisamplingButton8 = document.getElementById("multisamplingButton8")
+multisamplingButton8.addEventListener("click", function(){
+    samplesPerPixel = 8;
+})
+
+const multisamplingButton14 = document.getElementById("multisamplingButton14")
+multisamplingButton14.addEventListener("click", function(){
+    samplesPerPixel = 14;
+})
