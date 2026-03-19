@@ -35,3 +35,5 @@ vector.js - All the vector calculations are stored here.
 24FramesSong.mp3 - Is a song that I entirely made on my own in 2025 that I decided to re-use for this project.
 index.html - The HTML that runs the program.
 style.css - Holds all information about text colour, buttons and sliders.
+
+[text](https://github.com/amjvl-git/coursework-raytracer-26-robotDogDuck?tab=readme-ov-file)
