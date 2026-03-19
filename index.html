@@ -14,6 +14,7 @@
     <h1 id="whiteText">Ray Tracer</h1>
     <p id="whiteText">An assignment for the raytracing project.</p>
     <p id="whiteText">Made by Denis Saracev - P2922929.</p>
+    <p id="whiteText">Tip: When you have edited the settings of the render, press "Render Image" button again to see the changes!</p>
     <!-- Canvas -->
     <canvas id="canvas" width="650" height="650" style="border:5px solid#000000;">
         Your browser does not support the HTML canvas tag.</canvas>
@@ -21,7 +22,7 @@
     <p id="whiteText">This button will render the scene in Phong Lighting model, included with shadows,</p>
     <p id="whiteText">Gamma Correction and Multisampling enabled:</p>
     <div class="button-container">
-        <button id="render_button">Render Image</button>
+        <button id="renderButton">Render Image</button>
     </div>
     <!-- SETTINGS -->
     <!-- Specular adjustment slider -->
@@ -34,7 +35,7 @@
         <span id="shinyValue">50%</span>
     </div>
     <!-- Ambient, Diffuse, Specular & Phong Lighting button -->
-    <h4 id="whiteText">These buttons will render a scene without shadows or gamma applied:</h4>
+    <h4 id="whiteText">These buttons will render a scene without shadows applied:</h4>
     <div class="button-container">
         <button id="ambientButton" type="button">Ambient only</button>
         <button id="diffuseButton" type="button">Diffuse only</button>
@@ -87,7 +88,7 @@
     <h1 id="whiteText">Bonus settings:</h1>
     <!-- Audio track -->
     <audio id="myAudio">
-        <source src="24_frames_song.mp3" type="audio/mp3">
+        <source src="24FramesSong.mp3" type="audio/mp3">
         Your browser does not support the audio element.
     </audio>
     <!-- This creates 2 music buttons -->

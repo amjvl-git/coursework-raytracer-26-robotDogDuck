@@ -1,6 +1,6 @@
 /* Sets the background colour to grey */
 body {
-    background-color: rgb(50, 56, 65);
+  background-color: rgb(50, 56, 65);
 }
 
 /* Sets text to be white */
@@ -70,18 +70,9 @@ button:hover {
 .slider {
     width: 150px;
     height: 6px;
-    background: white;
+    background: grey;
     outline: none;
     appearance: none;
     appearance: none;
     border-radius: 3px;
 }
-
-/* .slider::-moz-range-thumb {
-    width: 18px;
-    height: 18px;
-    background: cyan;
-    cursor: pointer;
-    border-radius: 50%;
-    border: none;
-} */

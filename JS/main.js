@@ -1,11 +1,8 @@
+/////////////////////// IMPORTS //////////////////////
 import { Vec3 } from "/JS/vector.js"
 import { Sphere } from "/JS/spheres.js"
 import { Ray } from "/JS/ray.js"
-import { RayCastResult } from "/JS/ray_cast_result.js"
-import { render } from "/JS/functions"
-import { renderAmbientOnly } from "/JS/functions"
-import { renderDiffuseOnly } from "/JS/functions"
-import { renderSpecularOnly } from "/JS/functions"
+import { RayCastResult } from "/JS/rayCastResult.js"
 
 const c = document.getElementById("canvas")
 const ctx = c.getContext("2d")
@@ -16,7 +13,7 @@ let camPosition = new Vec3(0, 0, 0);
 let lightSource = new Vec3(1, 1, 0);
 let colour = new Vec3(0, 0, 0);
 
-///////////////////////////////////////// CAMERA SETTINGS
+/////////////////////// CAMERA SETTINGS //////////////////////
 // Event listener that toggles coordinates for the camera
 // Connect slider to x, y, z values
 let camPositionSliderX = document.getElementById("cameraPositionX");
@@ -56,7 +53,7 @@ camPositionSliderZ.addEventListener("input", function() {
 // Set initial x coordinate
 let z = camPositionSliderY.value / 100;
 
-/////////////////////////////////////// LIGHTING SETTINGS
+/////////////////////// LIGHTING SETTINGS //////////////////////
 // Event listener that toggles coordinates for the lights
 // Connect slider to x, y, z values
 let lightPositionSliderX = document.getElementById("lightPositionSliderX");
@@ -96,7 +93,7 @@ lightPositionSliderZ.addEventListener("input", function() {
 // Set initial x coordinate
 let zl = lightPositionSliderZ.value / 100;
 
-///////////////////////////////////// SPECULAR SETTINGS
+/////////////////////// SPECULAR (SHINY) SETTINGS //////////////////////
 // Event listener that toggles how shiny spheres can be
 // Connect slider to shiny value
 let shinySlider = document.getElementById("shinySlider");
@@ -113,6 +110,7 @@ shinySlider.addEventListener("input", function() {
 // Set initial shinyness
 let shiny = shinySlider.value / 100;
 
+/////////////////////// SPHERES //////////////////////
 // All the spheres in the scene
 let spheres = new Array(
     new Sphere(new Vec3(0,0,-1), 0.3, new Vec3(1,0,0), shiny),                 // Red sphere
@@ -129,12 +127,12 @@ let spheres = new Array(
     new Sphere(new Vec3(0,-100.5,-1), 100, new Vec3(0,1,0), shiny)             // Floor green BIG sphere
 );
 
+/////////////////////// HIT/MISS RAYS //////////////////////
 // Calculate the intersection point and normal when a ray hits a sphere. Returns a RayCastResult.
 function hit(ray, t, sphereIndex)
 {
     const intersectionPoint = ray.origin.add(ray.direction.scale(t));
     const intersectionNormal = intersectionPoint.minus(spheres[sphereIndex].centre).scale(1 / spheres[sphereIndex].radius);
-    //const reflectSource = reflect((-lightSource, intersectionNormal).normalised());
     
     return new RayCastResult(intersectionPoint, intersectionNormal, t, sphereIndex);
 }
@@ -154,10 +152,10 @@ function traceRay(ray)
     // Find the sphere intersection closest to this ray
     for (let i = 0; i < spheres.length; i++)
     {
-        let current_t = spheres[i].rayIntersects(ray);
-        if(current_t > 0 && current_t < t)
+        let currentT = spheres[i].rayIntersects(ray);
+        if(currentT > 0 && currentT < t)
         {
-            t = current_t;
+            t = currentT;
             closestSphereIndex = i;
         }
     }
@@ -166,7 +164,9 @@ function traceRay(ray)
     return hit(ray, t, closestSphereIndex);
 }
 
+/////////////////////// ADD COLOUR TO CANVAS //////////////////////
 // Calculate and return the background colour based on the ray
+// Gradient background
 function backgroundColour(ray)
 {
     let white = new Vec3(1, 1, 1);
@@ -175,7 +175,7 @@ function backgroundColour(ray)
     return white.scale(1 - t).add(blue.scale(t));
 }
 
-// Event listener that toggles "Ambient" render
+// Creates colour with ambient lighting only
 function rayColourAmbientOnly(ray) {
     const castResult = traceRay(ray);
     if(castResult.t < 0) return backgroundColour(ray);
@@ -190,7 +190,7 @@ function rayColourAmbientOnly(ray) {
     return new Vec3(Math.min(1, gammaCorrection.x), Math.min(1, gammaCorrection.y), Math.min(1, gammaCorrection.z));
 }
 
-// Event listener that toggles "Diffuse" render
+// Creates colour with diffuse lighting only
 function rayColourDiffuseOnly(ray) {
     const castResult = traceRay(ray);
     if(castResult.t < 0) return backgroundColour(ray);
@@ -207,6 +207,7 @@ function rayColourDiffuseOnly(ray) {
     return new Vec3(Math.min(1, gammaCorrection.x), Math.min(1, gammaCorrection.y), Math.min(1, gammaCorrection.z));
 }
 
+// Creates colour with specular lighting only
 function rayColourSpecularOnly(ray) {
         const castResult = traceRay(ray);
         if(castResult.t < 0) return backgroundColour(ray);
@@ -227,7 +228,7 @@ function rayColourSpecularOnly(ray) {
 }
 
 // Activates when user presses "Render Image" button
-// Renders with Phong Lighting Model + shadows + gamma
+// Creates colour with Phong Lighting Model + shadows + gamma
 function rayColour(ray) {
         const castResult = traceRay(ray);
         if(castResult.t < 0) return backgroundColour(ray);
@@ -258,7 +259,7 @@ function rayColour(ray) {
         return new Vec3(Math.min(1, gammaCorrection.x), Math.min(1, gammaCorrection.y), Math.min(1, gammaCorrection.z));
 }
 
-
+/////////////////////// RENDERING //////////////////////
 // Sets a pixel at (x, y) in the canvas with an RGB Vec3
 function setPixel(x, y, colour)
 {
@@ -266,12 +267,131 @@ function setPixel(x, y, colour)
     ctx.fillRect(x, c.height - y, 1, 1)
 }
 
+// Renders in ambience only
+function renderAmbientOnly() {
+    for (let i = 0; i < imageWidth; i++)
+    {
+        for (let j = 0; j <= imageHeight; j++)
+        {
+            let accumulatedColor = new Vec3(0, 0, 0);
+            
+            // Cast multiple rays per pixel and average the results
+            for (let s = 0; s < samplesPerPixel; s++)
+            {
+                // Random offset within the pixel for better anti-aliasing
+                const randomX = Math.random();
+                const randomY = Math.random();
+                
+                const u = (i + randomX) / imageWidth * 2 - 1;
+                const v = (j + randomY) / imageHeight * 2 - 1;
+                
+                const ray = new Ray((camPosition), new Vec3(u, v, -1));
+                accumulatedColor = accumulatedColor.add(rayColourAmbientOnly(ray));
+            }
+            
+            // Average the samples
+            colour = accumulatedColor.scale(255 / samplesPerPixel);
+            setPixel(i, j, colour);
+        }
+    }
+}
+
+// Renders in diffuse only
+function renderDiffuseOnly() {
+    for (let i = 0; i < imageWidth; i++)
+    {
+        for (let j = 0; j <= imageHeight; j++)
+        {
+            let accumulatedColor = new Vec3(0, 0, 0);
+            
+            // Cast multiple rays per pixel and average the results
+            for (let s = 0; s < samplesPerPixel; s++)
+            {
+                // Random offset within the pixel for better anti-aliasing
+                const randomX = Math.random();
+                const randomY = Math.random();
+                
+                const u = (i + randomX) / imageWidth * 2 - 1;
+                const v = (j + randomY) / imageHeight * 2 - 1;
+                
+                const ray = new Ray((camPosition), new Vec3(u, v, -1));
+                accumulatedColor = accumulatedColor.add(rayColourDiffuseOnly(ray));
+            }
+            
+            // Average the samples
+            colour = accumulatedColor.scale(255 / samplesPerPixel);
+            setPixel(i, j, colour);
+        }
+    }
+}
+
+// Renders in Specular only
+function renderSpecularOnly() {
+    for (let i = 0; i < imageWidth; i++)
+    {
+        for (let j = 0; j <= imageHeight; j++)
+        {
+            let accumulatedColor = new Vec3(0, 0, 0);
+            
+            // Cast multiple rays per pixel and average the results
+            for (let s = 0; s < samplesPerPixel; s++)
+            {
+                // Random offset within the pixel for better anti-aliasing
+                const randomX = Math.random();
+                const randomY = Math.random();
+                
+                const u = (i + randomX) / imageWidth * 2 - 1;
+                const v = (j + randomY) / imageHeight * 2 - 1;
+                
+                const ray = new Ray((camPosition), new Vec3(u, v, -1));
+                accumulatedColor = accumulatedColor.add(rayColourSpecularOnly(ray));
+            }
+            
+            // Average the samples
+            colour = accumulatedColor.scale(255 / samplesPerPixel);
+            setPixel(i, j, colour);
+        }
+    }
+}
+
+// Renders out the image in full Phong Light Model
+function render(){
+    for (let i = 0; i < imageWidth; i++)
+    {
+        for (let j = 0; j <= imageHeight; j++)
+        {
+            let accumulatedColor = new Vec3(0, 0, 0);
+            
+            // Cast multiple rays per pixel and average the results
+            for (let s = 0; s < samplesPerPixel; s++)
+            {
+                // Random offset within the pixel for better anti-aliasing
+                const randomX = Math.random();
+                const randomY = Math.random();
+                
+                const u = (i + randomX) / imageWidth * 2 - 1;
+                const v = (j + randomY) / imageHeight * 2 - 1;
+                
+                const ray = new Ray((camPosition), new Vec3(u, v, -1));
+                // const ray = new Ray(new Vec3(0, 1, 0), new Vec3(u, v, -1));
+                accumulatedColor = accumulatedColor.add(rayColour(ray));
+            }
+            
+            // Average the samples
+            colour = accumulatedColor.scale(255 / samplesPerPixel);
+            setPixel(i, j, colour);
+        }
+    }
+}
+
+/////////////////////// EVENT LISTENERS //////////////////////
+/////////////////////// RENDER BUTTONS //////////////////////
 // Main code with multisampling for anti-aliasing
 let samplesPerPixel = 4;
 
 // Event listener that renders the image out when the user presses the "Render Image" button
-const render_button = document.getElementById("render_button")
-render_button.addEventListener("click", function(){
+const renderButton = document.getElementById("renderButton")
+renderButton.addEventListener("click", function(){
     ctx.clearRect(0, 0, imageWidth, imageHeight);
     render();
 })
@@ -296,7 +416,9 @@ specularButton.addEventListener("click", function(){
     renderSpecularOnly();
 })
 
+/////////////////////// MULTISAMPLING BUTTONS //////////////////////
 // Even listeners that toggle how much samples per pixel there will be
+// based on what the user has pressed
 const multisamplingButton1 = document.getElementById("multisamplingButton1")
 multisamplingButton1.addEventListener("click", function(){
     samplesPerPixel = 1;
