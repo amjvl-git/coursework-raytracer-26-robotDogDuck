@@ -10,6 +10,14 @@ body {
     text-align:center;
 }
 
+/* Sets text to be white */
+#currentlyPlaying
+{
+    color: white;
+    text-align:center;
+}
+
+
 /* Makes the canvas be centered */
 canvas
 {

@@ -89,35 +89,60 @@ function backgroundColour(ray)
     return white.scale(1 - t).add(blue.scale(t));
 }
 
-function rayColour(ray) {
+// Event listener that toggles "Ambient" render
+function rayColourAmbientOnly(ray) {
     const castResult = traceRay(ray);
     if(castResult.t < 0) return backgroundColour(ray);
 
     const albedo = spheres[castResult.sphereIndex].colour;
+    const ambient = albedo.scale(0.05);
 
-    return colour;
+    const gamma = 2.2;
+    const colour = ambient;
+    const gammaCorrection = new Vec3(Math.pow(colour.x, 1/gamma), Math.pow(colour.y, 1/gamma), Math.pow(colour.z, 1/gamma));
+
+    return new Vec3(Math.min(1, gammaCorrection.x), Math.min(1, gammaCorrection.y), Math.min(1, gammaCorrection.z));
 }
 
-// Event listener that toggles "Ambient" render
-const ambientButton = document.getElementById("ambientButton")
-render_button.addEventListener("click", function(){
-    function rayColour(ray) {
+// Event listener that toggles "Diffuse" render
+function rayColourDiffuseOnly(ray) {
+    const castResult = traceRay(ray);
+    if(castResult.t < 0) return backgroundColour(ray);
+    const lightDir = lightSource.minus(castResult.position).normalised();
+
+    const albedo = spheres[castResult.sphereIndex].colour;
+    const diffuseScale = Math.max(0, castResult.normal.dot(lightDir));
+    const diffuseColor = albedo.scale(diffuseScale);
+
+    const gamma = 2.2;
+    const colour = diffuseColor;
+    const gammaCorrection = new Vec3(Math.pow(colour.x, 1/gamma), Math.pow(colour.y, 1/gamma), Math.pow(colour.z, 1/gamma));
+
+    return new Vec3(Math.min(1, gammaCorrection.x), Math.min(1, gammaCorrection.y), Math.min(1, gammaCorrection.z));
+}
+
+function rayColourSpecularOnly(ray) {
         const castResult = traceRay(ray);
         if(castResult.t < 0) return backgroundColour(ray);
+        const lightDir = lightSource.minus(castResult.position).normalised();
 
-        const albedo = spheres[castResult.sphereIndex].colour;
-        const ambient = albedo.scale(0.05);
+        const viewDir = ray.direction.normalised().scale(-1);
+        const reflectDir = lightDir.scale(-1).add(castResult.normal.scale(2 * lightDir.dot(castResult.normal))).normalised();
+        
+        const shininess = spheres[castResult.sphereIndex].specular * 50;
+        const specularFactor = Math.pow(Math.max(0, viewDir.dot(reflectDir)), shininess);
+        const specularColor = new Vec3(1, 1, 1).scale(specularFactor * 0.5);
 
         const gamma = 2.2;
-        const colour = ambient;
+        const colour = specularColor;
         const gammaCorrection = new Vec3(Math.pow(colour.x, 1/gamma), Math.pow(colour.y, 1/gamma), Math.pow(colour.z, 1/gamma));
 
         return new Vec3(Math.min(1, gammaCorrection.x), Math.min(1, gammaCorrection.y), Math.min(1, gammaCorrection.z));
-}})
+}
 
-const phongModelButton = document.getElementById("phongModelButton")
-render_button.addEventListener("click", function(){
-    function rayColour(ray) {
+// Activates when user presses "Render Image" button
+// Renders with Phong Lighting Model + shadows + gamma
+function rayColour(ray) {
         const castResult = traceRay(ray);
         if(castResult.t < 0) return backgroundColour(ray);
         const lightDir = lightSource.minus(castResult.position).normalised();
@@ -145,7 +170,7 @@ render_button.addEventListener("click", function(){
         const gammaCorrection = new Vec3(Math.pow(colour.x, 1/gamma), Math.pow(colour.y, 1/gamma), Math.pow(colour.z, 1/gamma));
 
         return new Vec3(Math.min(1, gammaCorrection.x), Math.min(1, gammaCorrection.y), Math.min(1, gammaCorrection.z));
-}})
+}
 
 
 // Sets a pixel at (x, y) in the canvas with an RGB Vec3
@@ -156,7 +181,7 @@ function setPixel(x, y, colour)
 }
 
 // Main code with multisampling for anti-aliasing
-const samplesPerPixel = 6;
+const samplesPerPixel = 8;
 
 function render(){
     for (let i = 0; i < imageWidth; i++)
@@ -186,14 +211,115 @@ function render(){
     }
 }
 
+function renderAmbientOnly() {
+    for (let i = 0; i < imageWidth; i++)
+    {
+        for (let j = 0; j <= imageHeight; j++)
+        {
+            let accumulatedColor = new Vec3(0, 0, 0);
+            
+            // Cast multiple rays per pixel and average the results
+            for (let s = 0; s < samplesPerPixel; s++)
+            {
+                // Random offset within the pixel for better anti-aliasing
+                const randomX = Math.random();
+                const randomY = Math.random();
+                
+                const u = (i + randomX) / imageWidth * 2 - 1;
+                const v = (j + randomY) / imageHeight * 2 - 1;
+                
+                const ray = new Ray(new Vec3(0, 0, 0), new Vec3(u, v, -1));
+                accumulatedColor = accumulatedColor.add(rayColourAmbientOnly(ray));
+            }
+            
+            // Average the samples
+            colour = accumulatedColor.scale(255 / samplesPerPixel);
+            setPixel(i, j, colour);
+        }
+    }
+}
+
+function renderDiffuseOnly() {
+    for (let i = 0; i < imageWidth; i++)
+    {
+        for (let j = 0; j <= imageHeight; j++)
+        {
+            let accumulatedColor = new Vec3(0, 0, 0);
+            
+            // Cast multiple rays per pixel and average the results
+            for (let s = 0; s < samplesPerPixel; s++)
+            {
+                // Random offset within the pixel for better anti-aliasing
+                const randomX = Math.random();
+                const randomY = Math.random();
+                
+                const u = (i + randomX) / imageWidth * 2 - 1;
+                const v = (j + randomY) / imageHeight * 2 - 1;
+                
+                const ray = new Ray(new Vec3(0, 0, 0), new Vec3(u, v, -1));
+                accumulatedColor = accumulatedColor.add(rayColourDiffuseOnly(ray));
+            }
+            
+            // Average the samples
+            colour = accumulatedColor.scale(255 / samplesPerPixel);
+            setPixel(i, j, colour);
+        }
+    }
+}
+
+function renderSpecularOnly() {
+    for (let i = 0; i < imageWidth; i++)
+    {
+        for (let j = 0; j <= imageHeight; j++)
+        {
+            let accumulatedColor = new Vec3(0, 0, 0);
+            
+            // Cast multiple rays per pixel and average the results
+            for (let s = 0; s < samplesPerPixel; s++)
+            {
+                // Random offset within the pixel for better anti-aliasing
+                const randomX = Math.random();
+                const randomY = Math.random();
+                
+                const u = (i + randomX) / imageWidth * 2 - 1;
+                const v = (j + randomY) / imageHeight * 2 - 1;
+                
+                const ray = new Ray(new Vec3(0, 0, 0), new Vec3(u, v, -1));
+                accumulatedColor = accumulatedColor.add(rayColourSpecularOnly(ray));
+            }
+            
+            // Average the samples
+            colour = accumulatedColor.scale(255 / samplesPerPixel);
+            setPixel(i, j, colour);
+        }
+    }
+}
+
 // Event listener that renders the image out when the user presses the "Render Image" button
 const render_button = document.getElementById("render_button")
 render_button.addEventListener("click", function(){
     ctx.clearRect(0, 0, imageWidth, imageHeight);
     render();
-    shiny = 0;
 })
 
-// Event listener that toggles "Diffuse" render
-// Event listener that toggles "Specular" render
+// Event listener that toggles "Ambient Only" render
+const ambientButton = document.getElementById("ambientButton")
+ambientButton.addEventListener("click", function(){
+    ctx.clearRect(0, 0, imageWidth, imageHeight);
+    renderAmbientOnly();
+})
+
+// Event listener that toggles "Diffuse only" render
+const diffuseButton = document.getElementById("diffuseButton")
+diffuseButton.addEventListener("click", function(){
+    ctx.clearRect(0, 0, imageWidth, imageHeight);
+    renderDiffuseOnly();
+})
+// Event listener that toggles "Specular only" render
+const specularButton = document.getElementById("specularButton")
+specularButton.addEventListener("click", function(){
+    ctx.clearRect(0, 0, imageWidth, imageHeight);
+    renderSpecularOnly();
+})
+
 // Event listener that toggles more spheres

@@ -18,26 +18,29 @@
     <canvas id="canvas" width="650" height="650" style="border:5px solid#000000;">
         Your browser does not support the HTML canvas tag.</canvas>
     <!-- Render Button -->
+    <p id="whiteText">This will render the scene in Phong Lighting model, included with shadows,</p>
+    <p id="whiteText">Gamma Correction and Multisampling enabled:</p>
     <div class="button-container">
         <button id="render_button">Render Image</button>
     </div>
     <!-- SETTINGS -->
-    <h2 id="whiteText">Settings:</h2>
     <!-- Specular adjustment slider -->
+    <h2 id="whiteText">Settings:</h2>
+    <p id="whiteText">Adjust the specular value:</p>
     <div class="slider-container">
         <label for="shinySlider">Specular val:</label>
         <input type="range" min="0" max="100" value="50" id="shinySlider" class="slider">
         <span id="shinyValue">50%</span>
     </div>
     <!-- Ambient, Diffuse, Specular & Phong Lighting button -->
-     <div class="button-container">
+    <p id="whiteText">These buttons will render a scene without shadows or gamma applied:</p>
+    <div class="button-container">
         <button id="ambientButton" type="button">Ambient only</button>
         <button id="diffuseButton" type="button">Diffuse only</button>
         <button id="specularButton" type="button">Specular only</button>
-        <button id="phongModelButton" type="button">Phong Model</button>
     </div>
     <!-- Text "Bonus" -->
-    <p id="whiteText">Bonus settings:</p>
+    <h2 id="whiteText">Bonus settings:</h2>
     <!-- Audio track -->
     <audio id="myAudio">
         <source src="24_frames_song.mp3" type="audio/mp3">
@@ -48,6 +51,8 @@
         <button onclick="playAudio()" type="button">Play Music</button>
         <button onclick="pauseAudio()" type="button">Pause Music</button>
     </div>
+    <!-- Says if a song is playing -->
+     <p id="currentlyPlaying">Currently Playing: Nothing!</p>
     <!-- This is a volume slider -->
     <div class="slider-container">
         <label for="volumeSlider">Volume:</label>
@@ -56,18 +61,23 @@
     </div>
 
     <script>
+
+
         // VOLUME settings
         // Creates a button which plays music!
         let audioElement = document.getElementById("myAudio"); 
-        // Button that plays audio
+        let currentlyPlaying = document.getElementById('currentlyPlaying')
+        // Button that plays audio & changes text
         function playAudio()
         { 
             audioElement.play(); 
+            currentlyPlaying.innerHTML = "Currently Playing: 24 Frames (Combined) Track"
         } 
-        // Button that Pauses audio
+        // Button that Pauses audio & changes text
         function pauseAudio()
         { 
-            audioElement.pause(); 
+            audioElement.pause();
+            currentlyPlaying.innerHTML = "Currently Playing: Nothing!"
         }
         // Loops the audio, so it keeps playing for infinity
         audioElement.loop = true;
