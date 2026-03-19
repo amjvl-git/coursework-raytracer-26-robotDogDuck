@@ -25,22 +25,58 @@
     </div>
     <!-- SETTINGS -->
     <!-- Specular adjustment slider -->
-    <h2 id="whiteText">Settings:</h2>
-    <p id="whiteText">Adjust the specular value:</p>
+    <h1 id="hiddenText">.</h1>
+    <h1 id="whiteText">Settings:</h1>
+    <h4 id="whiteText">Adjust the specular value:</h4>
     <div class="slider-container">
         <label for="shinySlider">Specular val:</label>
         <input type="range" min="0" max="100" value="50" id="shinySlider" class="slider">
         <span id="shinyValue">50%</span>
     </div>
     <!-- Ambient, Diffuse, Specular & Phong Lighting button -->
-    <p id="whiteText">These buttons will render a scene without shadows or gamma applied:</p>
+    <h4 id="whiteText">These buttons will render a scene without shadows or gamma applied:</h4>
     <div class="button-container">
         <button id="ambientButton" type="button">Ambient only</button>
         <button id="diffuseButton" type="button">Diffuse only</button>
         <button id="specularButton" type="button">Specular only</button>
     </div>
+    <!-- Camera position coordinate slider -->
+    <h4 id="whiteText">Adjust the Camera position coordinates:</h4>
+    <div class="slider-container">
+        <label for="cameraPositionX">X:</label>
+        <input type="range" min="0" max="100" value="0" id="cameraPositionX" class="slider">
+        <span id="camPosXValue">0%</span>
+    </div>
+    <div class="slider-container">
+        <label for="cameraPositionY">X:</label>
+        <input type="range" min="0" max="100" value="0" id="cameraPositionY" class="slider">
+        <span id="camPosYValue">0%</span>
+    </div>
+    <div class="slider-container">
+        <label for="cameraPositionZ">Z:</label>
+        <input type="range" min="0" max="100" value="0" id="cameraPositionZ" class="slider">
+        <span id="camPosZValue">0%</span>
+    </div>
+    <!-- Lighting position coordinate slider -->
+    <h4 id="whiteText">Adjust the Lighting position coordinates:</h4>
+    <div class="slider-container">
+        <label for="lightingPositionX">X:</label>
+        <input type="range" min="0" max="100" value="0" id="lightingPositionX" class="slider">
+        <span id="lightPosXValue">0%</span>
+    </div>
+    <div class="slider-container">
+        <label for="lightingPositionZ">Y:</label>
+        <input type="range" min="0" max="100" value="0" id="lightingPositionY" class="slider">
+        <span id="lightPosYValue">0%</span>
+    </div>
+    <div class="slider-container">
+        <label for="lightingPositionZ">Z:</label>
+        <input type="range" min="0" max="100" value="0" id="lightingPositionZ" class="slider">
+        <span id="lightPosZValue">0%</span>
+    </div>
     <!-- Text "Bonus" -->
-    <h2 id="whiteText">Bonus settings:</h2>
+    <h1 id="hiddenText">.</h1>
+    <h1 id="whiteText">Bonus settings:</h1>
     <!-- Audio track -->
     <audio id="myAudio">
         <source src="24_frames_song.mp3" type="audio/mp3">
@@ -61,8 +97,6 @@
     </div>
 
     <script>
-
-
         // VOLUME settings
         // Creates a button which plays music!
         let audioElement = document.getElementById("myAudio"); 

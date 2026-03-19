@@ -8,8 +8,30 @@ const ctx = c.getContext("2d")
 const imageWidth = document.getElementById("canvas").width
 const imageHeight = document.getElementById("canvas").height
 
-let colour = new Vec3(0, 0, 0);
+// Event listener that toggles coordinates for the camera
+// Connect slider to x, y, z values
+let camPositionSliderX = document.getElementById("cameraPositionX");
+let camPosXValue = document.getElementById("camPosXValue");
+let camPositionSliderY = document.getElementById("cameraPositionY");
+let camPosYValue = document.getElementById("camPosYValue");
+let camPositionSliderZ = document.getElementById("cameraPositionZ");
+let camPosZValue = document.getElementById("camPosZValue");
+
+// X value slider
+camPositionSliderX.addEventListener("input", function() {
+    x = this.value / 100;
+    camPosXValue.textContent = this.value + "%";
+    });
+
+// Set initial x coordinate
+let x = camPositionSliderX.value / 100;
+
+
+let camPosition = new Vec3(x, 0, 0);
 let lightSource = new Vec3(1, 1, 0);
+let colour = new Vec3(0, 0, 0);
+
+alert("x is " + x);
 
 // Event listener that toggles how shiny spheres can be
 // Connect slider to shiny value
@@ -200,7 +222,8 @@ function render(){
                 const u = (i + randomX) / imageWidth * 2 - 1;
                 const v = (j + randomY) / imageHeight * 2 - 1;
                 
-                const ray = new Ray(new Vec3(0, 0, 0), new Vec3(u, v, -1));
+                const ray = new Ray((camPosition), new Vec3(u, v, -1));
+                // const ray = new Ray(new Vec3(0, 1, 0), new Vec3(u, v, -1));
                 accumulatedColor = accumulatedColor.add(rayColour(ray));
             }
             

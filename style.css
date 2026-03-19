@@ -10,6 +10,12 @@ body {
     text-align:center;
 }
 
+/* Sets text to be background colour */
+#hiddenText
+{
+    opacity: 0;
+}
+
 /* Sets text to be white */
 #currentlyPlaying
 {
@@ -71,12 +77,11 @@ button:hover {
     border-radius: 3px;
 }
 
-/* Adjusts the slider ball */
-.slider::-moz-range-thumb {
+/* .slider::-moz-range-thumb {
     width: 18px;
     height: 18px;
     background: cyan;
     cursor: pointer;
     border-radius: 50%;
     border: none;
-}
+} */
