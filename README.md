@@ -36,4 +36,4 @@ vector.js - All the vector calculations are stored here.
 index.html - The HTML that runs the program.
 style.css - Holds all information about text colour, buttons and sliders.
 
-[text](https://github.com/amjvl-git/coursework-raytracer-26-robotDogDuck?tab=readme-ov-file)
+[Click me to go to the link of the repo!](https://github.com/amjvl-git/coursework-raytracer-26-robotDogDuck?tab=readme-ov-file)
